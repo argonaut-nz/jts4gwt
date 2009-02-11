@@ -10,5 +10,5 @@ import com.vividsolutions.jts.geom.Geometry;
 public interface EchoServiceAsync {
   void echo(Geometry input, AsyncCallback<Geometry> callback);
   
-  void echo(Coordinate c, AsyncCallback<Coordinate> callback);
+//  void echo(Coordinate c, AsyncCallback<Coordinate> callback);
 }

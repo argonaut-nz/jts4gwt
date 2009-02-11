@@ -22,8 +22,8 @@ public class EchoServiceImpl extends RemoteServiceServlet implements
 }
 
 
-public Coordinate echo(Coordinate c) {
-	return c;
-}
+//public Coordinate echo(Coordinate c) {
+//	return c;
+//}
 
 }

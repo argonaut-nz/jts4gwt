@@ -66,21 +66,21 @@ public class JTS4GWT implements EntryPoint {
 			@Override
 			public void onClick(ClickEvent event) {
 				final Geometry buffer = lineString.buffer(0.02);
-				map.addOverlay(MapsJTSFactory.overlayFromGeometry(buffer));
+//				map.addOverlay(MapsJTSFactory.overlayFromGeometry(buffer));
 				
-//				echoService.echo(buffer, new AsyncCallback<Geometry>(){
-//
-//					@Override
-//					public void onFailure(Throwable caught) {
-//						Window.alert(caught.toString());
-//						
-//					}
-//
-//					@Override
-//					public void onSuccess(Geometry result) {
-//						map.addOverlay(MapsJTSFactory.overlayFromGeometry(result));
-//						
-//					}});
+				echoService.echo(buffer, new AsyncCallback<Geometry>(){
+
+					@Override
+					public void onFailure(Throwable caught) {
+						Window.alert(caught.toString());
+						
+					}
+
+					@Override
+					public void onSuccess(Geometry result) {
+						map.addOverlay(MapsJTSFactory.overlayFromGeometry(result));
+						
+					}});
 			}});
 		vPanel.add(b);
 		

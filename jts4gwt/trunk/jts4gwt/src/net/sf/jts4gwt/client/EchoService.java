@@ -12,5 +12,5 @@ import com.vividsolutions.jts.geom.Geometry;
 public interface EchoService extends RemoteService {
   Geometry echo(Geometry geo);
   
-  Coordinate echo(Coordinate c);
+//  Coordinate echo(Coordinate c);
 }
