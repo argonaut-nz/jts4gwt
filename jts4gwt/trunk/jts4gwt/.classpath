@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry excluding="net/sf/jts4gwt/emul/" kind="src" path="src"/>
+	<classpathentry excluding="net/sf/jts4gwt/emul/|net/sf/jts4gwt/emul/com/|net/sf/jts4gwt/emul/java/" kind="src" path="src"/>
 	<classpathentry kind="src" path="src/net/sf/jts4gwt/emul"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3"/>
-	<classpathentry kind="lib" path="lib/jts-1.10.jar"/>
-	<classpathentry kind="lib" path="lib/gwt-maps.jar"/>
 	<classpathentry kind="lib" path="lib/gwt-user.jar"/>
+	<classpathentry kind="lib" path="lib/jts-1.10.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

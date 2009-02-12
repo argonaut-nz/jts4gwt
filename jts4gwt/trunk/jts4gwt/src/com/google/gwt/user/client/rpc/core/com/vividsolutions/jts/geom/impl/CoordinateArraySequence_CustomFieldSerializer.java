@@ -18,25 +18,14 @@ public final class CoordinateArraySequence_CustomFieldSerializer
 
 	public static CoordinateArraySequence instantiate(SerializationStreamReader streamReader)
 										throws SerializationException {
-		final int coordArrSize = streamReader.readInt();
-		final Coordinate coordArr[] = new Coordinate[coordArrSize];
-		for (int i = 0; i < coordArrSize; i++)
-		{
-			coordArr[i] = (Coordinate) streamReader.readObject();
-		}
+		final Coordinate [] coordArr = (Coordinate []) streamReader.readObject();
 		return new CoordinateArraySequence(coordArr);
 	}
 
 	public static void serialize(SerializationStreamWriter streamWriter,
 			CoordinateArraySequence instance) throws SerializationException
     {
-		final Coordinate coordArr[] = instance.toCoordinateArray();
-		final int coordArrLength = coordArr.length;
-		streamWriter.writeInt(coordArrLength);
-		for (int i = 0; i < coordArrLength; i++)
-		{
-			streamWriter.writeObject(coordArr[i]);
-		}
+		streamWriter.writeObject(instance.toCoordinateArray());
 	}
 
 }

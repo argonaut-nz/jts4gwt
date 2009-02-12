@@ -1,23 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module rename-to='jts4gwt'>
-  <!-- Inherit the core Web Toolkit stuff.                        -->
-  <inherits name='com.google.gwt.user.User'/>
-
-  <!-- Inherit the default GWT style sheet.  You can change       -->
-  <!-- the theme of your GWT application by uncommenting          -->
-  <!-- any one of the following lines.                            -->
-  <inherits name='com.google.gwt.user.theme.standard.Standard'/>
-  <!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
-  <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
-
-  <!-- Other module inherits                                      -->
-
-  <!-- Specify the app entry point class.                         -->
-  <entry-point class='net.sf.jts4gwt.client.JTS4GWT'/>
-  
-  <source path="client"/>
+<module>
   <super-source path="emul"/>
-
-  <inherits name="com.google.gwt.maps.GoogleMaps" />	  
-  <script src="http://maps.google.com/maps?file=api&amp;v=2.x&amp;key=ABQIAAAAhXIdp-XSRE3LPTBzlU1a7hRLL4Ko4omEDSnCI-MPdw5Hk6gGthRuEHcMPXT5_giy-aupx82d8X4OYg" />
 </module>

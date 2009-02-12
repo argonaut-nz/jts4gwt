@@ -21,12 +21,12 @@ public final class Polygon_CustomFieldSerializer
 										throws SerializationException {
 		final int SRID = streamReader.readInt();
 		GeometryFactory gf = new GeometryFactory(new PrecisionModel(), SRID);
-		final LinearRing shell = gf.createLinearRing(((LineString) streamReader.readObject()).getCoordinates());
+		final LinearRing shell = gf.createLinearRing(((LineString) streamReader.readObject()).getCoordinateSequence());
 		final int numInteriorRing = streamReader.readInt();
 		LinearRing linearRingArr[] = new LinearRing[numInteriorRing]; 
 		for (int i = 0; i < numInteriorRing; i++)
 		{
-			linearRingArr[i] = gf.createLinearRing(((LineString) streamReader.readObject()).getCoordinates());
+			linearRingArr[i] = gf.createLinearRing(((LineString) streamReader.readObject()).getCoordinateSequence());
 		}
 		return gf.createPolygon(shell, linearRingArr);
 	}
