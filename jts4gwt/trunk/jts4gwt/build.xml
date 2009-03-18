@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<project name="jts4gwt" default="jar" basedir=".">
+<project xmlns:artifact="antlib:org.apache.maven.artifact.ant" name="jts4gwt" default="jar" basedir=".">
+	<property file="${basedir}/build.properties"/>
 	<property name="version" value="1.10.0"/>
 	<property name="gwt.jar" value="jts4gwt-${version}.jar" />
 	<property name="source.dir" value="src"/>
     <property name="build.dir" value="classes"/>
 	<property name="lib.dir"  value="lib"/>
-	<property name="jar.dir"  value="dist"/>
+	<property name="dist.dir"  value="dist"/>
+	
 		
 	<!-- Classpath -->
     <path id="project.classpath">
@@ -25,12 +27,66 @@
     <target name="init"> 	
         <mkdir dir="${build.dir}"/>
     	
+		<property name="maven.repo.local" value="${user.home}/.m2/repository"/>
+		
+		<artifact:pom id="maven.project" file="pom.xml">
+		</artifact:pom>
+		
+		<property name="versionedName" value="${maven.project.artifactId}-${maven.project.version}"/>
+    	
     	<!-- Needed for GWT -->
         <copy includeemptydirs="false" todir="${build.dir}">
             <fileset dir="${source.dir}" excludes="**/*.launch"/>
         </copy>
     </target>
 	
+    <target name="download-deps" depends="init">
+        <artifact:dependencies pathId="compile.classpath" filesetId="compile.fileset" sourcesFilesetId="compile.sources.fileset" useScope="compile">
+            <artifact:pom refid="maven.project"/>
+        </artifact:dependencies>
+    </target>
+	
+	<target name="compile" depends="init" description="compile the source" >
+        <artifact:dependencies pathId="compile.classpath" filesetId="compile.fileset" useScope="compile">
+            <artifact:pom refid="maven.project"/>
+        </artifact:dependencies>
+
+        <!-- Compile the java code from ${src} into ${build} -->
+	    <javac encoding="ISO-8859-15" source="1.5" target="1.5" srcdir="${source.dir}" destdir="${build.dir}" debug="true" debuglevel="lines,source,vars">
+	      <include name="**/*.java"/>
+	      <exclude name="net/sf/jts4gwt/emul/**"/>
+	      <classpath refid="compile.classpath"/>
+	    </javac>
+	</target>
+	
+	<target name="dist" depends="compile" 
+		description="generate the distribution" >
+		<!-- Create the distribution directory -->
+		<mkdir dir="${dist.dir}/lib"/>
+		<!-- Put everything in ${build} into the MyProject-${DSTAMP}.jar file -->
+		<jar jarfile="${dist.dir}/lib/${versionedName}.jar" basedir="${build.dir}"/>
+	</target>
+	
+	<target name="install" depends="dist" description="install to local maven repository">
+		<artifact:install file="${dist.dir}/lib/${versionedName}.jar">
+			<pom refid="maven.project"/>
+		</artifact:install>
+	</target>
+	
+	<target name="deploy" depends="install">
+		<artifact:install-provider artifactId="wagon-ssh" version="1.0-beta-2"/>
+
+        <artifact:remoteRepository id="remoteRepository" url="scp://shell.sourceforge.net/home/groups/j/jt/jts4gwt/htdocs/maven/repository">
+        	<authentication username="${maven.repository.username}" password="${maven.repository.password}"/>
+        </artifact:remoteRepository>
+
+        <artifact:deploy file="${dist.dir}/lib/${versionedName}.jar">
+            <remoteRepository refId="remoteRepository" />
+            <pom refid="maven.project"/>
+        </artifact:deploy>
+	</target>
+	
+	<!-- 
     <target name="build" depends="init">
         <echo message="${ant.project.name}: ${ant.file}"/>
     	 <javac debug="on" destdir="${build.dir}">
@@ -40,8 +96,9 @@
         </javac>
     </target>
 	
-  <target name="jar" depends="build">
-	<mkdir dir="${jar.dir}" />
-	   <jar jarfile="${jar.dir}/${gwt.jar}" basedir="${build.dir}/"/>
+	<target name="jar" depends="build">
+		<mkdir dir="${jar.dir}" />
+	   		<jar jarfile="${jar.dir}/${gwt.jar}" basedir="${build.dir}/"/>
    </target>
+    -->
 </project>

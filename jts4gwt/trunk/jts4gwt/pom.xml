@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<!--
+		GWT-Maven archetype generated POM 
+	-->
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>net.sf</groupId>
+	<artifactId>jts4gwt</artifactId>
+	<packaging>jar</packaging>
+	<version>1.10.0</version>
+	<name>jts4gwt</name>
+	
+	<!--  include pluginRepository and repository for GWT-Maven -->
+    
+	<!--  convenience to define GWT version in one place -->
+	<properties>
+		<gwtVersion>1.5.3</gwtVersion>
+	</properties>
+	
+	<dependencies>
+		<dependency>
+			<groupId>com.google.gwt</groupId>
+			<artifactId>gwt-user</artifactId>
+			<version>${gwtVersion}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+    		<groupId>com.vividsolutions</groupId>
+             <artifactId>jts</artifactId>
+             <version>1.10</version>
+             <scope>provided</scope>
+             <!--  
+             <scope>system</scope>
+             <systemPath>${basedir}/lib/jts-1.10.jar</systemPath> 
+             -->    
+          </dependency>
+		<!--  test -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.1</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.0</version>
+				<configuration>
+					<excludes>
+						<value>net/sf/jts4gwt/emul/**</value>
+					</excludes>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	
+	<!--  profiles (with activation per platform) -->
+	<profiles>
+		<profile>
+			<id>gwt-dev-windows</id>
+			<properties>
+				<platform>windows</platform>
+			</properties>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+				<os>
+					<family>Windows</family>
+				</os>
+			</activation>
+		</profile>
+		<profile>
+			<id>gwt-dev-mac</id>
+			<properties>
+				<platform>mac</platform>
+			</properties>
+			<activation>
+				<os>
+					<family>mac</family>
+				</os>
+			</activation>
+		</profile>
+		<profile>
+			<id>gwt-dev-linux</id>
+			<properties>
+				<platform>linux</platform>
+			</properties>
+			<activation>
+				<os>
+					<name>Linux</name>
+				</os>
+			</activation>
+		</profile>
+	</profiles>
+	<repositories>
+		<repository>
+			<id>jts4gwt-repo</id>
+			<name>jts4gwt repository</name>
+			<url>http://jts4gwt.sf.net/maven/repository</url>
+		</repository>
+	</repositories>
+</project>
