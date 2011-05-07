@@ -1,10 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry excluding="net/sf/jts4gwt/emul/|net/sf/jts4gwt/emul/com/|net/sf/jts4gwt/emul/java/" kind="src" path="src"/>
-	<classpathentry kind="src" path="src/net/sf/jts4gwt/emul"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3"/>
-	<classpathentry kind="lib" path="lib/gwt-user.jar"/>
-	<classpathentry kind="lib" path="lib/jts-1.10.jar"/>
-	<classpathentry kind="output" path="war/WEB-INF/classes"/>
+  <classpathentry kind="src" path="src/main/java" including="**/*.java" excluding="net/sf/jts4gwt/emul/|net/sf/jts4gwt/emul/com/|net/sf/jts4gwt/emul/java/"/>
+  <classpathentry kind="src" path="src/main/java/net/sf/jts4gwt/emul" including="**/*.java" excluding="net/sf/jts4gwt/emul/|net/sf/jts4gwt/emul/com/|net/sf/jts4gwt/emul/java/"/>
+  <classpathentry kind="output" path="target/classes"/>
+  <classpathentry kind="var" path="M2_REPO/com/google/gwt/gwt-user/2.3.0/gwt-user-2.3.0.jar"/>
+  <classpathentry kind="var" path="M2_REPO/com/vividsolutions/jts/1.10/jts-1.10.jar" sourcepath="M2_REPO/com/vividsolutions/jts/1.10/jts-1.10-sources.jar"/>
+  <classpathentry kind="var" path="M2_REPO/junit/junit/4.1/junit-4.1.jar"/>
+  <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 </classpath>

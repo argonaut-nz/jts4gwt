@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<project xmlns:artifact="antlib:org.apache.maven.artifact.ant" name="jts4gwt" default="jar" basedir=".">
+<project xmlns:artifact="antlib:org.apache.maven.artifact.ant" name="jts4gwt" default="dist" basedir=".">
 	<property file="${basedir}/build.properties"/>
-	<property name="version" value="1.10.0"/>
+	<property name="version" value="1.10.1"/>
 	<property name="gwt.jar" value="jts4gwt-${version}.jar" />
-	<property name="source.dir" value="src"/>
+	<property name="source.dir" value="src/main/java"/>
     <property name="build.dir" value="classes"/>
 	<property name="lib.dir"  value="lib"/>
 	<property name="dist.dir"  value="dist"/>
-	
 		
 	<!-- Classpath -->
     <path id="project.classpath">
@@ -21,7 +20,7 @@
 	
    <target name="clean" description="Cleans this project">
     <delete dir="${build.dir}" failonerror="false" />
-    <delete dir="${jar.dir}" failonerror="false" />
+    <delete dir="${dist.dir}" failonerror="false" />
   </target>
 	
     <target name="init"> 	
@@ -76,7 +75,7 @@
 	<target name="deploy" depends="install">
 		<artifact:install-provider artifactId="wagon-ssh" version="1.0-beta-2"/>
 
-        <artifact:remoteRepository id="remoteRepository" url="scp://shell.sourceforge.net/home/groups/j/jt/jts4gwt/htdocs/maven/repository">
+        <artifact:remoteRepository id="remoteRepository" url="scp://shell.sourceforge.net/home/project-web/jts4gwt/htdocs/maven/repository">
         	<authentication username="${maven.repository.username}" password="${maven.repository.password}"/>
         </artifact:remoteRepository>
 
@@ -86,12 +85,12 @@
         </artifact:deploy>
 	</target>
 	
-	<!-- 
+	<!--
     <target name="build" depends="init">
         <echo message="${ant.project.name}: ${ant.file}"/>
     	 <javac debug="on" destdir="${build.dir}">
             <src path="${source.dir}"/>
-    	 	<exclude name="net/sf/jts4gwt/emul/**"/>
+    	 	<exclude name="**net/sf/jts4gwt/emul/**"/>
         	<classpath refid="project.classpath"/>
         </javac>
     </target>
@@ -100,5 +99,5 @@
 		<mkdir dir="${jar.dir}" />
 	   		<jar jarfile="${jar.dir}/${gwt.jar}" basedir="${build.dir}/"/>
    </target>
-    -->
+ 	-->
 </project>
