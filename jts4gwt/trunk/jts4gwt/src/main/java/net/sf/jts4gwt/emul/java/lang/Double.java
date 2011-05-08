@@ -206,7 +206,7 @@ public final class Double extends Number implements Comparable<Double> {
     value = parseDouble(s);
   }
 
-  @Override
+//  @Override
   public byte byteValue() {
     return (byte) value;
   }
@@ -268,7 +268,7 @@ public final class Double extends Number implements Comparable<Double> {
     return (long) value;
   }
 
-  @Override
+//  @Override
   public short shortValue() {
     return (short) value;
   }
