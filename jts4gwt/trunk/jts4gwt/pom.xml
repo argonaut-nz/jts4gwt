@@ -6,7 +6,7 @@
 	<groupId>net.sf</groupId>
 	<artifactId>jts4gwt</artifactId>
 	<packaging>jar</packaging>
-	<version>1.10.1</version>
+	<version>1.10.2</version>
 	<name>jts4gwt</name>
 
 
@@ -29,7 +29,7 @@
 		<dependency>
 			<groupId>com.vividsolutions</groupId>
 			<artifactId>jts</artifactId>
-			<version>1.10</version>
+			<version>1.11</version>
 			<scope>provided</scope>
 			<!-- <scope>system</scope> <systemPath>${basedir}/lib/jts-1.10.jar</systemPath> -->
 		</dependency>
