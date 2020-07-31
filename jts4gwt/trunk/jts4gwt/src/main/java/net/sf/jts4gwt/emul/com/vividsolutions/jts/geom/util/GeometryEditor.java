@@ -40,13 +40,12 @@ import java.util.ArrayList;
 
 
 /**
- * A class which supports 
- * creating new {@link Geometry}s 
+ * A class which supports creating new {@link Geometry}s 
  * which are modifications of existing ones.
  * Geometry objects are intended to be treated as immutable.
  * This class "modifies" Geometrys
  * by traversing them, applying a user-defined
- * {@link GeometryEditOperation} or {@link CoordinateOperation}  
+ * {@link GeometryEditorOperation} or {@link CoordinateOperation}  
  * and creating new Geometrys with the same structure but
  * (possibly) modified components.
  * <p>
@@ -57,7 +56,7 @@ import java.util.ArrayList;
  * <li>the coordinate lists may be changed
  *     (e.g. by adding or deleting coordinates).
  *     The modifed coordinate lists must be consistent with their original parent component
- *     (e.g. a LinearRing must always have at least 4 coordinates, and the first and last
+ *     (e.g. a <tt>LinearRing</tt> must always have at least 4 coordinates, and the first and last
  *     coordinate must be equal)
  * <li>components of the original geometry may be deleted
  * (   e.g. holes may be removed from a Polygon, or LineStrings removed from a MultiLineString).
@@ -68,14 +67,14 @@ import java.util.ArrayList;
  * If changing the structure is required, use a {@link GeometryTransformer}.
  * <p>
  * This class supports the case where an edited Geometry needs to
- * be created under a new GeometryFactory, via the {@link GeometryEditor(GeometryFactory)}
+ * be created under a new GeometryFactory, via the {@link #GeometryEditor(GeometryFactory)}
  * constructor.  
  * Examples of situations where this is required is if the geometry is 
  * transformed to a new SRID and/or a new PrecisionModel.
  * <p>
  * The resulting Geometry is not checked for validity.
  * If validity needs to be enforced, the new Geometry's 
- * {@link #isValid} method should be called.
+ * {@link Geometry#isValid} method should be called.
  *
  * @see GeometryTransformer
  * @see Geometry#isValid
@@ -116,7 +115,7 @@ public class GeometryEditor
    *
    * @param geometry the Geometry to edit
    * @param operation the edit operation to carry out
-   * @return a new {@link Geometry} which is the result of the editing
+   * @return a new {@link Geometry} which is the result of the editing (which may be empty)
    */
   public Geometry edit(Geometry geometry, GeometryEditorOperation operation)
   {
@@ -151,30 +150,26 @@ public class GeometryEditor
   private Polygon editPolygon(Polygon polygon,
                               GeometryEditorOperation operation) {
     Polygon newPolygon = (Polygon) operation.edit(polygon, factory);
-
+    // create one if needed
+    if (newPolygon == null)
+      newPolygon = factory.createPolygon((CoordinateSequence) null);
     if (newPolygon.isEmpty()) {
       //RemoveSelectedPlugIn relies on this behaviour. [Jon Aquino]
       return newPolygon;
     }
 
-    LinearRing shell = (LinearRing) edit(newPolygon.getExteriorRing(),
-        operation);
-
-    if (shell.isEmpty()) {
+    LinearRing shell = (LinearRing) edit(newPolygon.getExteriorRing(), operation);
+    if (shell == null || shell.isEmpty()) {
       //RemoveSelectedPlugIn relies on this behaviour. [Jon Aquino]
       return factory.createPolygon(null, null);
     }
 
     ArrayList holes = new ArrayList();
-
     for (int i = 0; i < newPolygon.getNumInteriorRing(); i++) {
-      LinearRing hole = (LinearRing) edit(newPolygon.getInteriorRingN(i),
-      operation);
-
-      if (hole.isEmpty()) {
+      LinearRing hole = (LinearRing) edit(newPolygon.getInteriorRingN(i), operation);
+      if (hole == null || hole.isEmpty()) {
         continue;
       }
-
       holes.add(hole);
     }
 
@@ -184,35 +179,33 @@ public class GeometryEditor
 
   private GeometryCollection editGeometryCollection(
       GeometryCollection collection, GeometryEditorOperation operation) {
-    GeometryCollection newCollection = (GeometryCollection) operation.edit(collection,
+    // first edit the entire collection
+    // MD - not sure why this is done - could just check original collection?
+    GeometryCollection collectionForType = (GeometryCollection) operation.edit(collection,
         factory);
+    
+    // edit the component geometries
     ArrayList geometries = new ArrayList();
-
-    for (int i = 0; i < newCollection.getNumGeometries(); i++) {
-      Geometry geometry = edit(newCollection.getGeometryN(i), operation);
-
-      if (geometry.isEmpty()) {
+    for (int i = 0; i < collectionForType.getNumGeometries(); i++) {
+      Geometry geometry = edit(collectionForType.getGeometryN(i), operation);
+      if (geometry == null || geometry.isEmpty()) {
         continue;
       }
-
       geometries.add(geometry);
     }
 
-    if (newCollection.getClass() == MultiPoint.class) {
+    if (collectionForType.getClass() == MultiPoint.class) {
       return factory.createMultiPoint((Point[]) geometries.toArray(
             new Point[] {  }));
     }
-
-    if (newCollection.getClass() == MultiLineString.class) {
+    if (collectionForType.getClass() == MultiLineString.class) {
       return factory.createMultiLineString((LineString[]) geometries.toArray(
             new LineString[] {  }));
     }
-
-    if (newCollection.getClass() == MultiPolygon.class) {
+    if (collectionForType.getClass() == MultiPolygon.class) {
       return factory.createMultiPolygon((Polygon[]) geometries.toArray(
             new Polygon[] {  }));
     }
-
     return factory.createGeometryCollection((Geometry[]) geometries.toArray(
           new Geometry[] {  }));
   }
@@ -232,12 +225,31 @@ public class GeometryEditor
      * @param factory the factory with which to construct the modified Geometry
      * (may be different to the factory of the input geometry)
      * @return a new Geometry which is a modification of the input Geometry
+     * @return null if the Geometry is to be deleted completely
      */
     Geometry edit(Geometry geometry, GeometryFactory factory);
   }
 
   /**
-   * A {@link GeometryEditorOperation} which modifies the coordinate list of a {@link Geometry}.
+   * A GeometryEditorOperation which does not modify
+   * the input geometry.
+   * This can be used for simple changes of 
+   * GeometryFactory (including PrecisionModel and SRID).
+   * 
+   * @author mbdavis
+   *
+   */
+  public static class NoOpGeometryOperation
+  implements GeometryEditorOperation
+  {
+  	public Geometry edit(Geometry geometry, GeometryFactory factory)
+  	{
+  		return geometry;
+  	}
+  }
+  
+  /**
+   * A {@link GeometryEditorOperation} which edits the coordinate list of a {@link Geometry}.
    * Operates on Geometry subclasses which contains a single coordinate list.
    */
   public abstract static class CoordinateOperation
@@ -277,6 +289,47 @@ public class GeometryEditor
      * @return an edited coordinate array (which may be the same as the input)
      */
     public abstract Coordinate[] edit(Coordinate[] coordinates,
+                                      Geometry geometry);
+  }
+  
+  /**
+   * A {@link GeometryEditorOperation} which edits the {@link CoordinateSequence}
+   * of a {@link Geometry}.
+   * Operates on Geometry subclasses which contains a single coordinate list.
+   */
+  public abstract static class CoordinateSequenceOperation
+      implements GeometryEditorOperation
+  {
+    public final Geometry edit(Geometry geometry, GeometryFactory factory) {
+      if (geometry instanceof LinearRing) {
+        return factory.createLinearRing(edit(
+            ((LinearRing)geometry).getCoordinateSequence(),
+            geometry));
+      }
+
+      if (geometry instanceof LineString) {
+        return factory.createLineString(edit(
+            ((LineString)geometry).getCoordinateSequence(),
+            geometry));
+      }
+
+      if (geometry instanceof Point) {
+        return factory.createPoint(edit(
+            ((Point)geometry).getCoordinateSequence(),
+            geometry));
+      }
+
+      return geometry;
+    }
+
+    /**
+     * Edits a {@link CoordinateSequence} from a {@link Geometry}.
+     *
+     * @param coordseq the coordinate array to operate on
+     * @param geometry the geometry containing the coordinate list
+     * @return an edited coordinate sequence (which may be the same as the input)
+     */
+    public abstract CoordinateSequence edit(CoordinateSequence coordSeq,
                                       Geometry geometry);
   }
 }

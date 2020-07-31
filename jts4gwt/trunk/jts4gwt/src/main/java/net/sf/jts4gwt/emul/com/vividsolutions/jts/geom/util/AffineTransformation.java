@@ -1,9 +1,42 @@
+/*
+* The JTS Topology Suite is a collection of Java classes that
+* implement the fundamental operations required to validate a given
+* geo-spatial data set to a known topological specification.
+*
+* Copyright (C) 2001 Vivid Solutions
+*
+* This library is free software; you can redistribute it and/or
+* modify it under the terms of the GNU Lesser General Public
+* License as published by the Free Software Foundation; either
+* version 2.1 of the License, or (at your option) any later version.
+*
+* This library is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+* Lesser General Public License for more details.
+*
+* You should have received a copy of the GNU Lesser General Public
+* License along with this library; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*
+* For more information, contact:
+*
+*     Vivid Solutions
+*     Suite #1A
+*     2328 Government Street
+*     Victoria BC  V8T 5G5
+*     Canada
+*
+*     (250)385-6040
+*     www.vividsolutions.com
+*/
+
 package com.vividsolutions.jts.geom.util;
 
 import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.util.*;
 /**
- * Represents a affine transformation on the 2D Cartesian plane. 
+ * Represents an affine transformation on the 2D Cartesian plane. 
  * It can be used to transform a {@link Coordinate} or {@link Geometry}.
  * An affine transformation is a mapping of the 2D plane into itself
  * via a series of transformations of the following basic types:
@@ -31,18 +64,22 @@ import com.vividsolutions.jts.util.*;
  * | y' |        | y |
  * | 1  |        | 1 |
  * </pre></blockquote>
+ * <h3>Transformation Composition</h3>
  * Affine transformations can be composed using the {@link #compose} method.
- * The composition of transformations is in general not commutative.
- * transformation matrices as follows:
+ * Composition is computed via multiplication of the 
+ * transformation matrices, and is defined as:
  * <blockquote><pre>
  * A.compose(B) = T<sub>B</sub> x T<sub>A</sub>
  * </pre></blockquote>
  * This produces a transformation whose effect is that of A followed by B.
- * Composition is computed via multiplication of the 
- * The methods {@link #reflect}, {@link #rotate}, {@link #scale}, {@link #shear}, and {@link #translate} 
+ * The methods {@link #reflect}, {@link #rotate}, 
+ * {@link #scale}, {@link #shear}, and {@link #translate} 
  * have the effect of composing a transformation of that type with
  * the transformation they are invoked on.  
  * <p>
+ * The composition of transformations is in general <i>not</i> commutative.
+ * 
+ * <h3>Transformation Inversion</h3>
  * Affine transformations may be invertible or non-invertible.  
  * If a transformation is invertible, then there exists 
  * an inverse transformation which when composed produces 
@@ -172,6 +209,25 @@ public class AffineTransformation
     return trans;
   }
   
+  /**
+   * Creates a transformation for a scaling relative to the point (x,y).
+   * 
+   * @param xScale the value to scale by in the x direction
+   * @param yScale the value to scale by in the y direction
+   * @param x the x-ordinate of the point to scale around
+   * @param y the y-ordinate of the point to scale around
+   * @return a transformation for the scaling
+   */
+  public static AffineTransformation scaleInstance(double xScale, double yScale, double x, double y)
+  {
+    AffineTransformation trans = new AffineTransformation();
+    trans.translate(-x, -y);
+    trans.scale(xScale, yScale);
+    trans.translate(x, y);
+    return trans;
+  }
+  
+
   /**
    * Creates a transformation for a shear.
    * 
@@ -441,11 +497,11 @@ public class AffineTransformation
   
   /**
    * Explicitly computes the math for a reflection.  May not work.
-   * @param x0
-   * @param y0
-   * @param x1
-   * @param y1
-   * @return
+   * @param x0 the X ordinate of one point on the reflection line
+   * @param y0 the Y ordinate of one point on the reflection line
+   * @param x1 the X ordinate of another point on the reflection line
+   * @param y1 the Y ordinate of another point on the reflection line
+   * @return this transformation, with an updated matrix
    */
   public AffineTransformation setToReflectionBasic(double x0, double y0, double x1, double y1)
   {
@@ -464,6 +520,16 @@ public class AffineTransformation
     return this;
   }
   
+  /**
+   * Sets this transformation to be a reflection 
+   * about the line defined by a line <tt>(x0,y0) - (x1,y1)</tt>.
+   * 
+   * @param x0 the X ordinate of one point on the reflection line
+   * @param y0 the Y ordinate of one point on the reflection line
+   * @param x1 the X ordinate of another point on the reflection line
+   * @param y1 the Y ordinate of another point on the reflection line
+   * @return this transformation, with an updated matrix
+   */
   public AffineTransformation setToReflection(double x0, double y0, double x1, double y1)
   {
     if (x0 == x1 && y0 == y1) {
@@ -495,7 +561,7 @@ public class AffineTransformation
    * is computed by:
    * <blockquote><pre>
    * d = sqrt(x<sup>2</sup> + y<sup>2</sup>)  
-   * sin = x / d;
+   * sin = y / d;
    * cos = x / d;
    * 
    * T<sub>ref</sub> = T<sub>rot(sin, cos)</sub> x T<sub>scale(1, -1)</sub> x T<sub>rot(-sin, cos)</sub  
@@ -510,6 +576,21 @@ public class AffineTransformation
     if (x == 0.0 && y == 0.0) {
       throw new IllegalArgumentException("Reflection vector must be non-zero");
     }
+    
+    /**
+     * Handle special case - x = y.
+     * This case is specified explicitly to avoid roundoff error.
+     */
+    if (x == y) {
+      m00 = 0.0;
+      m01 = 1.0;
+      m02 = 0.0;
+      m10 = 1.0;
+      m11 = 0.0;
+      m12 = 0.0;
+      return this;
+    }
+    
     // rotate vector to positive x axis direction
     double d = Math.sqrt(x * x + y * y);
     double sin = y / d;
@@ -910,6 +991,20 @@ public class AffineTransformation
   }
   
   /**
+   * Cretaes a new @link Geometry which is the result
+   * of this transformation applied to the input Geometry.
+   * 
+   *@param seq  a <code>Geometry</code>
+   *@return a transformed Geometry
+   */
+  public Geometry transform(Geometry g)
+  {
+    Geometry g2 = (Geometry) g.clone();
+    g2.apply(this);
+    return g2;    
+  }
+  
+  /**
    * Applies this transformation to the i'th coordinate
    * in the given CoordinateSequence.
    * 
@@ -921,7 +1016,7 @@ public class AffineTransformation
     double xp = m00 * seq.getOrdinate(i, 0) + m01 * seq.getOrdinate(i, 1) + m02;
     double yp = m10 * seq.getOrdinate(i, 0) + m11 * seq.getOrdinate(i, 1) + m12;
     seq.setOrdinate(i, 0, xp);
-    seq.setOrdinate(i, 1, yp);	
+    seq.setOrdinate(i, 1, yp);  
   }
   
   /**
@@ -973,9 +1068,9 @@ public class AffineTransformation
   */
   public boolean equals(Object obj)
   {
-    if (obj instanceof AffineTransformation)
-      return false;
     if (obj == null) return false;
+    if (! (obj instanceof AffineTransformation))
+      return false;
     
     AffineTransformation trans = (AffineTransformation) obj;
     return m00 == trans.m00
@@ -1010,12 +1105,11 @@ public class AffineTransformation
    */
   public Object clone()
   {
-//  	try {
-//  		return super.clone();
-//  	} catch(Exception ex) {
-//  		Assert.shouldNeverReachHere();
-//  	}
-//  	return null;
-	  return this;
+  	try {
+  		return super.clone();
+  	} catch(Exception ex) {
+  		Assert.shouldNeverReachHere();
+  	}
+  	return null;
   }
 }

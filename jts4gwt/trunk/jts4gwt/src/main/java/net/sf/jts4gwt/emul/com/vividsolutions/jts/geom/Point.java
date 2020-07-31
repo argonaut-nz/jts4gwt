@@ -35,10 +35,17 @@
 package com.vividsolutions.jts.geom;
 
 import com.vividsolutions.jts.util.Assert;
+import com.vividsolutions.jts.operation.valid.*;
 
 /**
- *  Basic implementation of <code>Point</code>.
+ * Represents a single point.
  *
+ * A <code>Point</code> is topologically valid if and only if:
+ * <ul>
+ * <li>the coordinate which defines it (if any) is a valid coordinate 
+ * (i.e does not have an <code>NaN</code> X or Y ordinate)
+ * </ul>
+ * 
  *@version 1.7
  */
 public class Point 
@@ -104,10 +111,6 @@ public class Point
     return true;
   }
 
-  public boolean isValid() {
-    return true;
-  }
-
   public int getDimension() {
     return 0;
   }
@@ -165,6 +168,9 @@ public class Point
     }
     if (isEmpty() && other.isEmpty()) {
       return true;
+    }
+    if (isEmpty() != other.isEmpty()) {
+      return false;
     }
     return equal(((Point) other).getCoordinate(), this.getCoordinate(), tolerance);
   }

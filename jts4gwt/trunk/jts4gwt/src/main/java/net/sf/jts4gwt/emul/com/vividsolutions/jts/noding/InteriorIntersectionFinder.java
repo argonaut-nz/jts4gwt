@@ -32,6 +32,9 @@
  */
 package com.vividsolutions.jts.noding;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.algorithm.LineIntersector;
 //import com.vividsolutions.jts.util.Debug;
@@ -45,10 +48,12 @@ import com.vividsolutions.jts.algorithm.LineIntersector;
 public class InteriorIntersectionFinder
     implements SegmentIntersector
 {
+	private boolean findAllIntersections = false;
 	private boolean isCheckEndSegmentsOnly = false;
   private LineIntersector li;
   private Coordinate interiorIntersection = null;
   private Coordinate[] intSegments = null;
+  private List intersections = new ArrayList();
 
   /**
    * Creates an intersection finder which finds an interior intersection
@@ -62,6 +67,16 @@ public class InteriorIntersectionFinder
     interiorIntersection = null;
   }
 
+  public void setFindAllIntersections(boolean findAllIntersections)
+  {
+    this.findAllIntersections = findAllIntersections;
+  }
+  
+  public List getIntersections()
+  {
+    return intersections;
+  }
+  
   /**
    * Sets whether only end segments should be tested for interior intersection.
    * This is a performance optimization that may be used if
@@ -110,8 +125,8 @@ public class InteriorIntersectionFinder
   /**
    * This method is called by clients
    * of the {@link SegmentIntersector} class to process
-   * intersections for two segments of the {@link SegmentStrings} being intersected.
-   * Note that some clients (such as {@link MonotoneChain}s) may optimize away
+   * intersections for two segments of the {@link SegmentString}s being intersected.
+   * Note that some clients (such as <code>MonotoneChain</code>s) may optimize away
    * this call for segment pairs which they have determined do not intersect
    * (e.g. by an disjoint envelope test).
    */
@@ -154,6 +169,7 @@ public class InteriorIntersectionFinder
       	intSegments[3] = p11;
       	
       	interiorIntersection = li.getIntersection(0);
+      	intersections.add(interiorIntersection);
       }
     }
   }
@@ -175,6 +191,7 @@ public class InteriorIntersectionFinder
   
   public boolean isDone()
   { 
+  	if (findAllIntersections) return false;
   	return interiorIntersection != null;
   }
 }

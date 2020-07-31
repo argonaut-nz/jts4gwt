@@ -43,6 +43,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.util.Debug;
 import com.vividsolutions.jts.index.kdtree.KdNode;
 import com.vividsolutions.jts.index.kdtree.KdTree;
 import com.vividsolutions.jts.triangulate.quadedge.LastFoundQuadEdgeLocator;
@@ -173,7 +174,7 @@ public class ConformingDelaunayTriangulator
 	/**
 	 * Gets the <tt>ConstraintVertexFactory</tt> used to create new constraint vertices at split points.
 	 * 
-	 * @return
+	 * @return a new constraint vertex
 	 */
 	public ConstraintVertexFactory getVertexFactory() {
 		return vertexFactory;
@@ -342,6 +343,7 @@ public class ConformingDelaunayTriangulator
 	 * @param vertices a collection of ConstraintVertex
 	 */
 	private void insertSites(Collection vertices) {
+		Debug.println("Adding sites: " + vertices.size());
 		for (Iterator i = vertices.iterator(); i.hasNext();) {
 			ConstraintVertex v = (ConstraintVertex) i.next();
 			insertSite(v);
@@ -409,8 +411,12 @@ public class ConformingDelaunayTriangulator
 			splits = enforceGabriel(segments);
 
 			count++;
+			Debug.println("Iter: " + count + "   Splits: " + splits
+					+ "   Current # segments = " + segments.size());
 		} while (splits > 0 && count < MAX_SPLIT_ITER);
 		if (count == MAX_SPLIT_ITER) {
+			Debug.println("ABORTED! Too many iterations while enforcing constraints");
+			if (!Debug.isDebugging())
 				throw new ConstraintEnforcementException(
 						"Too many splitting iterations while enforcing constraints.  Last split point was at: ",
 						splitPt);
@@ -474,6 +480,7 @@ public class ConformingDelaunayTriangulator
 			 */
 			ConstraintVertex insertedVertex = insertSite(splitVertex);
 			if (!insertedVertex.getCoordinate().equals2D(splitPt)) {
+				Debug.println("Split pt snapped to: " + insertedVertex);
 				// throw new ConstraintEnforcementException("Split point snapped to
 				// existing point
 				// (tolerance too large or constraint interior narrow angle?)",
@@ -514,7 +521,7 @@ public class ConformingDelaunayTriangulator
 	 * @param q
 	 *          end of the line segment
 	 * @return a point which is non-Gabriel
-	 * @return null if no point is non-Gabriel
+	 * or null if no point is non-Gabriel
 	 */
 	private Coordinate findNonGabrielPoint(Segment seg) {
 		Coordinate p = seg.getStart();

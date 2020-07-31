@@ -37,6 +37,7 @@ package com.vividsolutions.jts.operation.buffer;
  */
 import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.precision.SimpleGeometryPrecisionReducer;
+import com.vividsolutions.jts.math.MathUtil;
 import com.vividsolutions.jts.noding.*;
 import com.vividsolutions.jts.noding.snapround.*;
 
@@ -45,11 +46,13 @@ import com.vividsolutions.jts.noding.snapround.*;
 /**
  * Computes the buffer of a geometry, for both positive and negative buffer distances.
  * <p>
- * In GIS, the positive buffer of a geometry is defined as
- * the Minkowski sum or difference of the geometry
+ * In GIS, the positive (or negative) buffer of a geometry is defined as
+ * the Minkowski sum (or difference) of the geometry
  * with a circle of radius equal to the absolute value of the buffer distance.
  * In the CAD/CAM world buffers are known as </i>offset curves</i>.
- * In morphological analysis they are known as <i>erosion</i> and <i>dilation</i>
+ * In morphological analysis the 
+ * operation of postive and negative buffering 
+ * is referred to as <i>erosion</i> and <i>dilation</i>
  * <p>
  * The buffer operation always returns a polygonal result.
  * The negative or zero-distance buffer of lines and points is always an empty {@link Polygon}.
@@ -105,9 +108,12 @@ public class BufferOp
   /**
    * Compute a scale factor to limit the precision of
    * a given combination of Geometry and buffer distance.
-   * The scale factor is determined by a combination of
+   * The scale factor is determined by
    * the number of digits of precision in the (geometry + buffer distance),
    * limited by the supplied <code>maxPrecisionDigits</code> value.
+   * <p>
+   * The scale factor is based on the absolute magnitude of the (geometry + buffer distance).
+   * since this determines the number of digits of precision which must be handled.
    *
    * @param g the Geometry being buffered
    * @param distance the buffer distance
@@ -117,6 +123,29 @@ public class BufferOp
    * @return a scale factor for the buffer computation
    */
   private static double precisionScaleFactor(Geometry g,
+      double distance,
+    int maxPrecisionDigits)
+  {
+    Envelope env = g.getEnvelopeInternal();
+    double envMax = MathUtil.max(
+        Math.abs(env.getMaxX()), 
+            Math.abs(env.getMaxY()), 
+                Math.abs(env.getMinX()), 
+                    Math.abs(env.getMinY())
+            );
+    
+    double expandByDistance = distance > 0.0 ? distance : 0.0;
+    double bufEnvMax = envMax + 2 * expandByDistance;
+
+    // the smallest power of 10 greater than the buffer envelope
+    int bufEnvPrecisionDigits = (int) (Math.log(bufEnvMax) / Math.log(10) + 1.0);
+    int minUnitLog10 = maxPrecisionDigits - bufEnvPrecisionDigits;
+    
+    double scaleFactor = Math.pow(10.0, minUnitLog10);
+    return scaleFactor;
+  }
+
+  private static double OLDprecisionScaleFactor(Geometry g,
       double distance,
     int maxPrecisionDigits)
   {
@@ -291,6 +320,7 @@ public class BufferOp
         bufferReducedPrecision(precDigits);
       }
       catch (TopologyException ex) {
+      	// update the saved exception to reflect the new input geometry
         saveException = ex;
         // don't propagate the exception - it will be detected by fact that resultGeometry is null
       }
@@ -312,7 +342,7 @@ public class BufferOp
       saveException = ex;
       // don't propagate the exception - it will be detected by fact that resultGeometry is null
 
-      // testing - propagate exception
+      // testing ONLY - propagate exception
       //throw ex;
     }
   }

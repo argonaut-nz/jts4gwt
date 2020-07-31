@@ -46,7 +46,7 @@ import com.vividsolutions.jts.planargraph.*;
  *
  * @version 1.7
  */
-public class EdgeRing {
+class EdgeRing {
 
   /**
    * Find the innermost enclosing shell EdgeRing containing the argument EdgeRing, if any.
@@ -60,7 +60,7 @@ public class EdgeRing {
    * (which is guaranteed to be the case if the hole does not touch its shell)
    *
    * @return containing EdgeRing, if there is one
-   * @return null if no containing EdgeRing is found
+   * or null if no containing EdgeRing is found
    */
   public static EdgeRing findEdgeRingContaining(EdgeRing testEr, List shellList)
   {
@@ -69,27 +69,28 @@ public class EdgeRing {
     Coordinate testPt = testRing.getCoordinateN(0);
 
     EdgeRing minShell = null;
-    Envelope minEnv = null;
+    Envelope minShellEnv = null;
     for (Iterator it = shellList.iterator(); it.hasNext(); ) {
       EdgeRing tryShell = (EdgeRing) it.next();
-      LinearRing tryRing = tryShell.getRing();
-      Envelope tryEnv = tryRing.getEnvelopeInternal();
-      if (minShell != null) minEnv = minShell.getRing().getEnvelopeInternal();
-      boolean isContained = false;
+      LinearRing tryShellRing = tryShell.getRing();
+      Envelope tryShellEnv = tryShellRing.getEnvelopeInternal();
       // the hole envelope cannot equal the shell envelope
-      if (tryEnv.equals(testEnv))
-        continue;
-
-//      testPt = ptNotInList(testRing.getCoordinates(), tryRing.getCoordinates());
-      testPt = CoordinateArrays.ptNotInList(testRing.getCoordinates(), tryRing.getCoordinates());
-      if (tryEnv.contains(testEnv)
-          && CGAlgorithms.isPointInRing(testPt, tryRing.getCoordinates()) )
+      // (also guards against testing rings against themselves)
+      if (tryShellEnv.equals(testEnv)) continue;
+      // hole must be contained in shell
+      if (! tryShellEnv.contains(testEnv)) continue;
+      
+      testPt = CoordinateArrays.ptNotInList(testRing.getCoordinates(), tryShellRing.getCoordinates());
+      boolean isContained = false;
+      if (CGAlgorithms.isPointInRing(testPt, tryShellRing.getCoordinates()) )
         isContained = true;
+
       // check if this new containing ring is smaller than the current minimum ring
       if (isContained) {
         if (minShell == null
-            || minEnv.contains(tryEnv)) {
+            || minShellEnv.contains(tryShellEnv)) {
           minShell = tryShell;
+          minShellEnv = minShell.getRing().getEnvelopeInternal();
         }
       }
     }
@@ -101,7 +102,9 @@ public class EdgeRing {
    * @param testPts the {@link Coordinate}s to test
    * @param pts an array of {@link Coordinate}s to test the input points against
    * @return a {@link Coordinate} from <code>testPts</code> which is not in <code>pts</code>,
-   * @return null if there is no coordinate not in the list
+   * or null if there is no coordinate not in the list
+   * 
+   * @deprecated Use CoordinateArrays.ptNotInList instead
    */
   public static Coordinate ptNotInList(Coordinate[] testPts, Coordinate[] pts)
   {
@@ -120,6 +123,8 @@ public class EdgeRing {
    * @param pt a {@link Coordinate} for the test point
    * @param pts an array of {@link Coordinate}s to test
    * @return <code>true</code> if the point is in the array
+   * 
+   * @deprecated
    */
   public static boolean isInList(Coordinate pt, Coordinate[] pts)
   {
@@ -196,7 +201,8 @@ public class EdgeRing {
 
   /**
    * Tests if the {@link LinearRing} ring formed by this edge ring is topologically valid.
-   * @return
+   * 
+   * @return true if the ring is valid
    */
   public boolean isValid()
   {

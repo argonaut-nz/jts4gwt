@@ -36,7 +36,9 @@ package com.vividsolutions.jts.operation.union;
 import java.util.*;
 import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.geom.util.*;
+import com.vividsolutions.jts.operation.linemerge.LineMerger;
 import com.vividsolutions.jts.operation.overlay.OverlayOp;
+import com.vividsolutions.jts.operation.overlay.snap.SnapIfNeededOverlayOp;
 
 /**
  * Unions a collection of Geometry or a single Geometry 
@@ -47,23 +49,28 @@ import com.vividsolutions.jts.operation.overlay.OverlayOp;
  * <p>
  * The result obeys the following contract:
  * <ul>
- * <li>Unioning a set of overlapping {@link Polygons}s has the effect of
+ * <li>Unioning a set of overlapping {@link Polygon}s has the effect of
  * merging the areas (i.e. the same effect as 
  * iteratively unioning all individual polygons together).
  * 
- * <li>Unioning a set of {@link LineString}s has the effect of <b>fully noding</b> 
+ * <li>Unioning a set of {@link LineString}s has the effect of <b>noding</b> 
  * and <b>dissolving</b> the input linework.
- * In this context "fully noded" means that there will be a node or endpoint in the output 
+ * In this context "fully noded" means that there will be 
+ * an endpoint or node in the result 
  * for every endpoint or line segment crossing in the input.
- * "Dissolved" means that any duplicate (e.g. coincident) line segments or portions
- * of line segments will be reduced to a single line segment in the output.  
+ * "Dissolved" means that any duplicate (i.e. coincident) line segments or portions
+ * of line segments will be reduced to a single line segment in the result.  
  * This is consistent with the semantics of the 
  * {@link Geometry#union(Geometry)} operation.
  * If <b>merged</b> linework is required, the {@link LineMerger} class can be used.
  * 
- * <li>Unioning a set of {@link Points}s has the effect of merging
- * al identical points (producing a set with no duplicates).
+ * <li>Unioning a set of {@link Point}s has the effect of merging
+ * all identical points (producing a set with no duplicates).
  * </ul>
+ * 
+ * <tt>UnaryUnion</tt> always operates on the individual components of MultiGeometries.
+ * So it is possible to use it to "clean" invalid self-intersecting MultiPolygons
+ * (although the polygon components must all still be individually valid.)
  * 
  * @author mbdavis
  *
@@ -138,7 +145,7 @@ public class UnaryUnionOp
 	 * If no input geometries were provided, a POINT EMPTY is returned.
 	 * 
 	 * @return a Geometry containing the union
-	 * @return an empty GEOMETRYCOLLECTION if no geometries were provided in the input
+	 * or an empty GEOMETRYCOLLECTION if no geometries were provided in the input
 	 */
 	public Geometry union()
 	{
@@ -146,7 +153,12 @@ public class UnaryUnionOp
 			return null;
 		}
 		
-		
+		/**
+		 * For points and lines, only a single union operation is 
+		 * required, since the OGC model allowings self-intersecting 
+		 * MultiPoint and MultiLineStrings.
+		 * This is not the case for polygons, so Cascaded Union is required.
+		 */
 		Geometry unionPoints = null;
 		if (points.size() > 0) {
 			Geometry ptGeom = geomFact.buildGeometry(points);
@@ -190,7 +202,7 @@ public class UnaryUnionOp
    * @param g0 a Geometry
    * @param g1 a Geometry
    * @return the union of the input(s)
-   * @return null if both inputs are null
+   * or null if both inputs are null
    */
   private Geometry unionWithNull(Geometry g0, Geometry g1)
   {
@@ -211,6 +223,8 @@ public class UnaryUnionOp
    * Due to the way the overlay operations 
    * are implemented, this is still efficient in the case of linear 
    * and puntal geometries.
+   * Uses robust version of overlay operation
+   * to ensure identical behaviour to the <tt>union(Geometry)</tt> operation.
    * 
    * @param g0 a geometry
    * @return the union of the input geometry
@@ -218,7 +232,7 @@ public class UnaryUnionOp
 	private Geometry unionNoOpt(Geometry g0)
 	{
     Geometry empty = geomFact.createPoint((Coordinate) null);
-		return OverlayOp.overlayOp(g0, empty, OverlayOp.UNION);
+		return SnapIfNeededOverlayOp.overlayOp(g0, empty, OverlayOp.UNION);
 	}
 	
 }

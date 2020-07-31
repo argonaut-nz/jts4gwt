@@ -42,11 +42,17 @@ import com.vividsolutions.jts.algorithm.*;
 
 /**
  * Models a site (node) in a {@link QuadEdgeSubdivision}. 
- * The sites can be points on a lineString representing a
+ * The sites can be points on a line string representing a
  * linear site. 
+ * <p>
  * The vertex can be considered as a vector with a norm, length, inner product, cross
  * product, etc. Additionally, point relations (e.g., is a point to the left of a line, the circle
  * defined by this point and two others, etc.) are also defined in this class.
+ * <p>
+ * It is common to want to attach user-defined data to 
+ * the vertices of a subdivision.  
+ * One way to do this is to subclass <tt>Vertex</tt>
+ * to carry any desired information.
  * 
  * @author David Skea
  * @author Martin Davis
@@ -149,7 +155,7 @@ public class Vertex
     /**
      * Computes the inner or dot product
      * 
-     * @param v, a vertex
+     * @param v a vertex
      * @return returns the dot product u.v
      */
     double dot(Vertex v) {
@@ -159,7 +165,7 @@ public class Vertex
     /**
      * Computes the scalar product c(v)
      * 
-     * @param v, a vertex
+     * @param v a vertex
      * @return returns the scaled vector
      */
     Vertex times(double c) {
@@ -324,7 +330,7 @@ public class Vertex
     }
 
     /**
-     * For this vertex enclosed in a triangle defined by three verticies v0, v1 and v2, interpolate
+     * For this vertex enclosed in a triangle defined by three vertices v0, v1 and v2, interpolate
      * a z value from the surrounding vertices.
      */
     public double interpolateZValue(Vertex v0, Vertex v1, Vertex v2) {
@@ -344,7 +350,17 @@ public class Vertex
     }
 
     /**
-     * Interpolates the Z value of a point enclosed in a 3D triangle.
+     * Interpolates the Z-value (height) of a point enclosed in a triangle
+     * whose vertices all have Z values.
+     * The containing triangle must not be degenerate
+     * (in other words, the three vertices must enclose a 
+     * non-zero area).
+     * 
+     * @param p the point to interpolate the Z value of
+     * @param v0 a vertex of a triangle containing the p
+     * @param v1 a vertex of a triangle containing the p
+     * @param v2 a vertex of a triangle containing the p
+     * @return the interpolated Z-value (height) of the point  
      */
     public static double interpolateZ(Coordinate p, Coordinate v0, Coordinate v1, Coordinate v2) {
         double x0 = v0.x;
@@ -368,7 +384,7 @@ public class Vertex
      * @param p
      * @param p0
      * @param p1
-     * @return
+     * @return the interpolated Z value
      */
     public static double interpolateZ(Coordinate p, Coordinate p0, Coordinate p1) {
         double segLen = p0.distance(p1);

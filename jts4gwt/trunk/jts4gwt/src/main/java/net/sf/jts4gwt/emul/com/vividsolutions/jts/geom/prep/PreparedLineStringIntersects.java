@@ -48,7 +48,7 @@ import com.vividsolutions.jts.geom.util.*;
  * @author Martin Davis
  *
  */
-public class PreparedLineStringIntersects 
+class PreparedLineStringIntersects 
 {
 	/**
 	 * Computes the intersects predicate between a {@link PreparedLineString}
@@ -88,12 +88,14 @@ public class PreparedLineStringIntersects
 		 * If any segments intersect, obviously intersects = true
 		 */
     List lineSegStr = SegmentStringUtil.extractSegmentStrings(geom);
-		boolean segsIntersect = prepLine.getIntersectionFinder().intersects(lineSegStr);
-		// MD - performance testing
-//		boolean segsIntersect = false;
-		if (segsIntersect) 
-      return true;
-		
+    // only request intersection finder if there are segments (ie NOT for point inputs)
+    if (lineSegStr.size() > 0) {
+  		boolean segsIntersect = prepLine.getIntersectionFinder().intersects(lineSegStr);
+  		// MD - performance testing
+  //		boolean segsIntersect = false;
+  		if (segsIntersect) 
+        return true;
+    }
 		/**
 		 * For L/L case we are done
 		 */

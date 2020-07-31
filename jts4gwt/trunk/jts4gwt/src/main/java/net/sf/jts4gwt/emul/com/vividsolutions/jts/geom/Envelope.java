@@ -83,8 +83,10 @@ public class Envelope
   }
 
   /**
-   * Test the envelope defined by p1-p2 for intersection
-   * with the envelope defined by q1-q2
+   * Tests whether the envelope defined by p1-p2
+   * and the envelope defined by q1-q2
+   * intersect.
+   * 
    * @param p1 one extremal point of the envelope P
    * @param p2 another extremal point of the envelope P
    * @param q1 one extremal point of the envelope Q
@@ -169,7 +171,7 @@ public class Envelope
   /**
    *  Creates an <code>Envelope</code> for a region defined by a single Coordinate.
    *
-   *@param  p1  the Coordinate
+   *@param  p  the Coordinate
    */
   public Envelope(Coordinate p)
   {
@@ -236,8 +238,7 @@ public class Envelope
   /**
    *  Initialize an <code>Envelope</code> to a region defined by a single Coordinate.
    *
-   *@param  p1  the first Coordinate
-   *@param  p2  the second Coordinate
+   *@param  p  the coordinate
    */
   public void init(Coordinate p)
   {
@@ -356,12 +357,39 @@ public class Envelope
   }
   
   /**
+   * Gets the minimum extent of this envelope across both dimensions.
+   * 
+   * @return the minimum extent of this envelope
+   */
+	public double minExtent()
+	{
+		if (isNull()) return 0.0;
+		double w = getWidth();
+		double h = getHeight();
+		if (w < h) return w;
+		return h;
+	}
+	
+  /**
+   * Gets the maximum extent of this envelope across both dimensions.
+   * 
+   * @return the maximum extent of this envelope
+   */
+	public double maxExtent()
+	{
+		if (isNull()) return 0.0;
+		double w = getWidth();
+		double h = getHeight();
+		if (w > h) return w;
+		return h;
+	}
+  
+  /**
    *  Enlarges this <code>Envelope</code> so that it contains
    *  the given {@link Coordinate}. 
    *  Has no effect if the point is already on or within the envelope.
    *
    *@param  p  the Coordinate to expand to include
-   *@param  y  the value to lower the minimum y to or to raise the maximum y to
    */
   public void expandToInclude(Coordinate p)
   {
@@ -373,7 +401,6 @@ public class Envelope
    * Both positive and negative distances are supported.
    *
    * @param distance the distance to expand the envelope
-   * @return this envelope
    */
   public void expandBy(double distance)
   {
@@ -494,7 +521,7 @@ public class Envelope
   }
 
   /**
-   * Computes the intersection of two {@link Envelopes}
+   * Computes the intersection of two {@link Envelope}s.
    *
    * @param env the envelope to intersect with
    * @return a new Envelope representing the intersection of the envelopes (this will be
@@ -541,7 +568,7 @@ public class Envelope
    *  Check if the point <code>p</code>
    *  overlaps (lies inside) the region of this <code>Envelope</code>.
    *
-   *@param  other  the <code>Coordinate</code> to be tested
+   *@param  p  the <code>Coordinate</code> to be tested
    *@return        <code>true</code> if the point overlaps this <code>Envelope</code>
    */
   public boolean intersects(Coordinate p) {
@@ -585,7 +612,7 @@ public class Envelope
    *@param  other the <code>Envelope</code> to check
    *@return true if <code>other</code> is contained in this <code>Envelope</code>
    *
-   *@see covers(Envelope)
+   *@see #covers(Envelope)
    */
   public boolean contains(Envelope other) {
   	return covers(other);
@@ -602,7 +629,7 @@ public class Envelope
    *@return    <code>true</code> if the point lies in the interior or
    *      on the boundary of this <code>Envelope</code>.
    *      
-   *@see covers(Coordinate)
+   *@see #covers(Coordinate)
    */
   public boolean contains(Coordinate p) {
     return covers(p);
@@ -621,7 +648,7 @@ public class Envelope
    *@return    <code>true</code> if <code>(x, y)</code> lies in the interior or
    *      on the boundary of this <code>Envelope</code>.
    *      
-   *@see covers(double, double)
+   *@see #covers(double, double)
    */
   public boolean contains(double x, double y) {
   	return covers(x, y);
@@ -681,12 +708,17 @@ public class Envelope
   public double distance(Envelope env)
   {
     if (intersects(env)) return 0;
+    
     double dx = 0.0;
-    if (maxx < env.minx) dx = env.minx - maxx;
-    if (minx > env.maxx) dx = minx - env.maxx;
+    if (maxx < env.minx) 
+      dx = env.minx - maxx;
+    else if (minx > env.maxx) 
+      dx = minx - env.maxx;
+    
     double dy = 0.0;
-    if (maxy < env.miny) dy = env.miny - maxy;
-    if (miny > env.maxy) dy = miny - env.maxy;
+    if (maxy < env.miny) 
+      dy = env.miny - maxy;
+    else if (miny > env.maxy) dy = miny - env.maxy;
 
     // if either is zero, the envelopes overlap either vertically or horizontally
     if (dx == 0.0) return dy;

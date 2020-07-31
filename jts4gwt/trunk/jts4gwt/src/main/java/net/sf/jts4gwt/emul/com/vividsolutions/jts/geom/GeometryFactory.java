@@ -303,8 +303,6 @@ public class GeometryFactory
   	return new GeometryCollection(geometries, this);
   }
 
-
-
   /**
    * Creates a MultiPolygon using the given Polygons; a null or empty array
    * will create an empty Polygon. The polygons must conform to the
@@ -320,7 +318,8 @@ public class GeometryFactory
   }
 
   /**
-   * Creates a LinearRing using the given Coordinates; a null or empty array will
+   * Creates a {@link LinearRing} using the given {@link Coordinate}s.
+   * A null or empty array will
    * create an empty LinearRing. The points must form a closed and simple
    * linestring. Consecutive points must not be equal.
    * @param coordinates an array without null elements, or an empty array, or null
@@ -330,20 +329,23 @@ public class GeometryFactory
   }
 
   /**
-   * Creates a LinearRing using the given CoordinateSequence; a null or empty CoordinateSequence will
+   * Creates a {@link LinearRing} using the given {@link CoordinateSequence}. 
+   * A null or empty CoordinateSequence will
    * create an empty LinearRing. The points must form a closed and simple
    * linestring. Consecutive points must not be equal.
+   * 
    * @param coordinates a CoordinateSequence possibly empty, or null
+   * @throws IllegalArgumentException if the ring is not closed, or has too few points
    */
   public LinearRing createLinearRing(CoordinateSequence coordinates) {
     return new LinearRing(coordinates, this);
   }
 
   /**
-   * Creates a MultiPoint using the given Points.
+   * Creates a {@link MultiPoint} using the given {@link Point}s.
    * A null or empty array will create an empty MultiPoint.
    *
-   * @param coordinates an array (without null elements), or an empty array, or <code>null</code>
+   * @param point an array of Points (without null elements), or an empty array, or <code>null</code>
    * @return a MultiPoint object
    */
   public MultiPoint createMultiPoint(Point[] point) {
@@ -364,11 +366,12 @@ public class GeometryFactory
   }
 
   /**
-   * Creates a MultiPoint using the given CoordinateSequence.
-   * A a null or empty CoordinateSequence will create an empty MultiPoint.
+   * Creates a {@link MultiPoint} using the 
+   * points in the given {@link CoordinateSequence}.
+   * A <code>null</code> or empty CoordinateSequence creates an empty MultiPoint.
    *
    * @param coordinates a CoordinateSequence (possibly empty), or <code>null</code>
-   * @return a MultiPoint object
+   * @return a MultiPoint geometry
    */
   public MultiPoint createMultiPoint(CoordinateSequence coordinates) {
     if (coordinates == null) {
@@ -376,7 +379,10 @@ public class GeometryFactory
     }
     Point[] points = new Point[coordinates.size()];
     for (int i = 0; i < coordinates.size(); i++) {
-      points[i] = createPoint(coordinates.getCoordinate(i));
+      CoordinateSequence ptSeq = getCoordinateSequenceFactory()
+        .create(1, coordinates.getDimension());
+      CoordinateSequences.copy(coordinates, i, ptSeq, 0, 1);
+      points[i] = createPoint(ptSeq);
     }
     return createMultiPoint(points);
   }
@@ -393,9 +399,49 @@ public class GeometryFactory
    *            the inner boundaries of the new <code>Polygon</code>, or
    *            <code>null</code> or empty <code>LinearRing</code> s if
    *            the empty geometry is to be created.
+   * @throws IllegalArgumentException if a ring is invalid
    */
   public Polygon createPolygon(LinearRing shell, LinearRing[] holes) {
     return new Polygon(shell, holes, this);
+  }
+
+  /**
+   * Constructs a <code>Polygon</code> with the given exterior boundary.
+   *
+   * @param shell
+   *            the outer boundary of the new <code>Polygon</code>, or
+   *            <code>null</code> or an empty <code>LinearRing</code> if
+   *            the empty geometry is to be created.
+   * @throws IllegalArgumentException if the boundary ring is invalid
+   */
+  public Polygon createPolygon(CoordinateSequence coordinates) {
+    return createPolygon(createLinearRing(coordinates));
+  }
+
+  /**
+   * Constructs a <code>Polygon</code> with the given exterior boundary.
+   *
+   * @param shell
+   *            the outer boundary of the new <code>Polygon</code>, or
+   *            <code>null</code> or an empty <code>LinearRing</code> if
+   *            the empty geometry is to be created.
+   * @throws IllegalArgumentException if the boundary ring is invalid
+   */
+  public Polygon createPolygon(Coordinate[] coordinates) {
+    return createPolygon(createLinearRing(coordinates));
+  }
+
+  /**
+   * Constructs a <code>Polygon</code> with the given exterior boundary.
+   *
+   * @param shell
+   *            the outer boundary of the new <code>Polygon</code>, or
+   *            <code>null</code> or an empty <code>LinearRing</code> if
+   *            the empty geometry is to be created.
+   * @throws IllegalArgumentException if the boundary ring is invalid
+   */
+  public Polygon createPolygon(LinearRing shell) {
+    return createPolygon(shell, null);
   }
 
   /**
@@ -494,12 +540,34 @@ public class GeometryFactory
   }
 
   /**
-   * @return a clone of g based on a CoordinateSequence created by this
-   * GeometryFactory's CoordinateSequenceFactory
+   * Creates a deep copy of the input {@link Geometry}.
+   * The {@link CoordinateSequenceFactory} defined for this factory
+   * is used to copy the {@link CoordinateSequence}s
+   * of the input geometry.
+   * <p>
+   * This is a convenient way to change the <tt>CoordinateSequence</tt>
+   * used to represent a geometry, or to change the 
+   * factory used for a geometry.
+   * <p>
+   * {@link Geometry#clone()} can also be used to make a deep copy,
+   * but it does not allow changing the CoordinateSequence type.
+   * 
+   * @return a deep copy of the input geometry, using the CoordinateSequence type of this factory
+   * 
+   * @see Geometry#clone() 
    */
   public Geometry createGeometry(Geometry g)
   {
-    // could this be cached to make this more efficient? Or maybe it isn't enough overhead to bother
+    GeometryEditor editor = new GeometryEditor(this);
+    return editor.edit(g, new GeometryEditor.CoordinateSequenceOperation() {
+      public CoordinateSequence edit(CoordinateSequence coordSeq, Geometry geometry) {
+                  return coordinateSequenceFactory.create(coordSeq);
+          }
+    });
+  }
+  /*
+  public Geometry OLDcreateGeometry(Geometry g)
+  {
     GeometryEditor editor = new GeometryEditor(this);
     return editor.edit(g, new GeometryEditor.CoordinateOperation() {
       public Coordinate[] edit(Coordinate[] coordinates, Geometry geometry) {
@@ -507,7 +575,7 @@ public class GeometryFactory
           }
     });
   }
-
+*/
 
   public int getSRID() {
     return SRID;

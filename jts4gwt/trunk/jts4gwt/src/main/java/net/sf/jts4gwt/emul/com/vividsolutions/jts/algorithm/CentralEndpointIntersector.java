@@ -75,7 +75,7 @@ public class CentralEndpointIntersector
 	private void compute() 
 	{
 		Coordinate centroid = average(pts);
-		intPt = findNearestPoint(centroid, pts);
+		intPt = new Coordinate(findNearestPoint(centroid, pts));
 	}
 
 	public Coordinate getIntersection() {
@@ -113,7 +113,8 @@ public class CentralEndpointIntersector
   	Coordinate result = null;
   	for (int i = 0; i < pts.length; i++) {
   		double dist = p.distance(pts[i]);
-  		if (dist < minDist) {
+  		// always initialize the result
+  		if (i == 0 || dist < minDist) {
   			minDist = dist;
   			result = pts[i];
   		}

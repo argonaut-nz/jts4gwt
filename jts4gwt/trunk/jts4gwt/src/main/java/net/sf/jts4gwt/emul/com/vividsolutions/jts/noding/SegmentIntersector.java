@@ -32,16 +32,20 @@
  */
 package com.vividsolutions.jts.noding;
 
+import java.util.*;
+import com.vividsolutions.jts.geom.*;
+import com.vividsolutions.jts.algorithm.LineIntersector;
+import com.vividsolutions.jts.util.Debug;
 
 /**
  * Processes possible intersections detected by a {@link Noder}.
  * The {@link SegmentIntersector} is passed to a {@link Noder}.
- * The {@link addIntersections} method is called whenever the {@link Noder}
+ * The {@link SegmentIntersector#processIntersections(SegmentString, int, SegmentString, int)} method is called whenever the {@link Noder}
  * detects that two SegmentStrings <i>might</i> intersect.
  * This class may be used either to find all intersections, or
  * to detect the presence of an intersection.  In the latter case,
  * Noders may choose to short-circuit their computation by calling the
- * {@link isDone} method.
+ * {@link #isDone()} method.
  * This class is an example of the <i>Strategy</i> pattern.
  *
  * @version 1.7
@@ -51,7 +55,7 @@ public interface SegmentIntersector
   /**
    * This method is called by clients
    * of the {@link SegmentIntersector} interface to process
-   * intersections for two segments of the {@link SegmentStrings} being intersected.
+   * intersections for two segments of the {@link SegmentString}s being intersected.
    */
   void processIntersections(
     SegmentString e0,  int segIndex0,

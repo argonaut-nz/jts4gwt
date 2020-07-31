@@ -1,3 +1,36 @@
+/*
+* The JTS Topology Suite is a collection of Java classes that
+* implement the fundamental operations required to validate a given
+* geo-spatial data set to a known topological specification.
+*
+* Copyright (C) 2001 Vivid Solutions
+*
+* This library is free software; you can redistribute it and/or
+* modify it under the terms of the GNU Lesser General Public
+* License as published by the Free Software Foundation; either
+* version 2.1 of the License, or (at your option) any later version.
+*
+* This library is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+* Lesser General Public License for more details.
+*
+* You should have received a copy of the GNU Lesser General Public
+* License along with this library; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*
+* For more information, contact:
+*
+*     Vivid Solutions
+*     Suite #1A
+*     2328 Government Street
+*     Victoria BC  V8T 5G5
+*     Canada
+*
+*     (250)385-6040
+*     www.vividsolutions.com
+*/
+
 package com.vividsolutions.jts.linearref;
 
 import com.vividsolutions.jts.geom.*;
@@ -78,14 +111,25 @@ public class LengthIndexedLine
   public Geometry extractLine(double startIndex, double endIndex)
   {
     LocationIndexedLine lil = new LocationIndexedLine(linearGeom);
-    LinearLocation startLoc = locationOf(startIndex);
-    LinearLocation endLoc = locationOf(endIndex);
+    double startIndex2 = clampIndex(startIndex);
+    double endIndex2 = clampIndex(endIndex);
+    // if extracted line is zero-length, resolve start lower as well to ensure they are equal
+    boolean resolveStartLower = startIndex2 == endIndex2;
+    LinearLocation startLoc = locationOf(startIndex2, resolveStartLower);
+//    LinearLocation endLoc = locationOf(endIndex2, true);
+//    LinearLocation startLoc = locationOf(startIndex2);
+    LinearLocation endLoc = locationOf(endIndex2);
     return ExtractLineByLocation.extract(linearGeom, startLoc, endLoc);
   }
 
   private LinearLocation locationOf(double index)
   {
     return LengthLocationMap.getLocation(linearGeom, index);
+  }
+
+  private LinearLocation locationOf(double index, boolean resolveLower)
+  {
+    return LengthLocationMap.getLocation(linearGeom, index, resolveLower);
   }
 
   /**
@@ -103,7 +147,7 @@ public class LengthIndexedLine
    * @param pt a point on the line
    * @return the minimum index of the point
    *
-   * @see project
+   * @see #project(Coordinate)
    */
   public double indexOf(Coordinate pt)
   {
@@ -130,7 +174,7 @@ public class LengthIndexedLine
    * @param minIndex the value the returned index must be greater than
    * @return the index of the point greater than the given minimum index
    *
-   * @see project
+   * @see #project(Coordinate)
    */
   public double indexOfAfter(Coordinate pt, double minIndex)
   {
@@ -192,7 +236,7 @@ public class LengthIndexedLine
   /**
    * Tests whether an index is in the valid index range for the line.
    *
-   * @param length the index to test
+   * @param index the index to test
    * @return <code>true</code> if the index is in the valid range
    */
   public boolean isValidIndex(double index)
@@ -209,12 +253,19 @@ public class LengthIndexedLine
    */
   public double clampIndex(double index)
   {
+    double posIndex = positiveIndex(index);
     double startIndex = getStartIndex();
-    if (index < startIndex) return startIndex;
+    if (posIndex < startIndex) return startIndex;
 
     double endIndex = getEndIndex();
-    if (index > endIndex) return endIndex;
+    if (posIndex > endIndex) return endIndex;
 
-    return index;
+    return posIndex;
+  }
+  
+  private double positiveIndex(double index)
+  {
+    if (index >= 0.0) return index;
+    return linearGeom.getLength() + index;
   }
 }

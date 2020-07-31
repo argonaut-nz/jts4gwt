@@ -43,7 +43,7 @@ import java.util.Map;
  * In other words, specifies the grid of allowable
  *  points for all <code>Geometry</code>s.
  * <p>
- * The {@link makePrecise} method allows rounding a coordinate to
+ * The {@link #makePrecise(Coordinate)} method allows rounding a coordinate to
  * a "precise" value; that is, one whose
  *  precision is known exactly.
  *<p>
@@ -76,12 +76,13 @@ import java.util.Map;
  * of 1000. To specify -3 decimal places of precision (i.e. rounding to
  * the nearest 1000), use a scale factor of 0.001.
  * <p>
- *  Coordinates are represented internally as Java double-precision values.
+ * Coordinates are represented internally as Java double-precision values.
  * Since Java uses the IEEE-394 floating point standard, this
- *  provides 53 bits of precision. (Thus the maximum precisely representable
- *  integer is 9,007,199,254,740,992).
- *<p>
- *  JTS methods currently do not handle inputs with different precision models.
+ * provides 53 bits of precision. (Thus the maximum precisely representable
+ * <i>integer</i> is 9,007,199,254,740,992 - or almost 16 decimal digits of precision).
+ * <p>
+ * JTS binary methods currently do not handle inputs which have different precision models.
+ * The precision model of any constructed geometric value is undefined.
  *
  *@version 1.7
  */
@@ -118,8 +119,10 @@ public class PrecisionModel implements Serializable, Comparable
     }
     private String name;
     public String toString() { return name; }
-    /**
-     * @see http://www.javaworld.com/javaworld/javatips/jw-javatip122.html
+    
+    
+    /*
+     * Ssee http://www.javaworld.com/javaworld/javatips/jw-javatip122.html
      */
     private Object readResolve() {
         return nameToTypeMap.get(name);
@@ -235,7 +238,21 @@ public class PrecisionModel implements Serializable, Comparable
   /**
    * Returns the maximum number of significant digits provided by this
    * precision model.
-   * Intended for use by routines which need to print out precise values.
+   * Intended for use by routines which need to print out 
+   * decimal representations of precise values (such as {@link WKTWriter}).
+   * <p>
+   * This method would be more correctly called
+   * <tt>getMinimumDecimalPlaces</tt>, 
+   * since it actually computes the number of decimal places
+   * that is required to correctly display the full
+   * precision of an ordinate value.
+   * <p>
+   * Since it is difficult to compute the required number of
+   * decimal places for scale factors which are not powers of 10,
+   * the algorithm uses a very rough approximation in this case.
+   * This has the side effect that for scale factors which are
+   * powers of 10 the value returned is 1 greater than the true value.
+   * 
    *
    * @return the maximum number of decimal places provided by this precision model
    */
@@ -374,10 +391,16 @@ public class PrecisionModel implements Serializable, Comparable
    * uniform rounding behaviour no matter where the number is
    * on the number line.
    * <p>
+   * This method has no effect on NaN values.
+   * <p>
    * <b>Note:</b> Java's <code>Math#rint</code> uses the "Banker's Rounding" algorithm,
    * which is not suitable for precision operations elsewhere in JTS.
    */
-  public double makePrecise(double val) {
+  public double makePrecise(double val) 
+  {
+  	// don't change NaN values
+  	if (Double.isNaN(val)) return val;
+  	
   	if (modelType == FLOATING_SINGLE) {
   		float floatSingleVal = (float) val;
   		return (double) floatSingleVal;
@@ -428,7 +451,7 @@ public class PrecisionModel implements Serializable, Comparable
    *  Compares this {@link PrecisionModel} object with the specified object for order.
    * A PrecisionModel is greater than another if it provides greater precision.
    * The comparison is based on the value returned by the
-   * {@link getMaximumSignificantDigits) method.
+   * {@link #getMaximumSignificantDigits} method.
    * This comparison is not strictly accurate when comparing floating precision models
    * to fixed models; however, it is correct when both models are either floating or fixed.
    *

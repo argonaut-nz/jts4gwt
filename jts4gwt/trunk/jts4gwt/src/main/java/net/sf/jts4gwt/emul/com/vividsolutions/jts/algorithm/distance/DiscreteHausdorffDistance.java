@@ -157,7 +157,7 @@ public class DiscreteHausdorffDistance
   {
     private PointPairDistance maxPtDist = new PointPairDistance();
     private PointPairDistance minPtDist = new PointPairDistance();
-    private EuclideanDistanceToPoint euclideanDist = new EuclideanDistanceToPoint();
+    private DistanceToPoint euclideanDist = new DistanceToPoint();
     private Geometry geom;
 
     public MaxPointDistanceFilter(Geometry geom)
@@ -168,7 +168,7 @@ public class DiscreteHausdorffDistance
     public void filter(Coordinate pt)
     {
       minPtDist.initialize();
-      EuclideanDistanceToPoint.computeDistance(geom, pt, minPtDist);
+      DistanceToPoint.computeDistance(geom, pt, minPtDist);
       maxPtDist.setMaximum(minPtDist);
     }
 
@@ -207,7 +207,7 @@ public class DiscreteHausdorffDistance
       double y = p0.y + i*dely;
       Coordinate pt = new Coordinate(x, y);
       minPtDist.initialize();
-      EuclideanDistanceToPoint.computeDistance(geom, pt, minPtDist);
+      DistanceToPoint.computeDistance(geom, pt, minPtDist);
       maxPtDist.setMaximum(minPtDist);  
     }
     

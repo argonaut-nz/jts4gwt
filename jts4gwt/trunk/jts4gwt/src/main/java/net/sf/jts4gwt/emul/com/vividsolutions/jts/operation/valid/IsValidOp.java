@@ -41,7 +41,7 @@ import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.util.*;
 
 /**
- * Implements the algorithsm required to compute the <code>isValid()</code> method
+ * Implements the algorithms required to compute the <code>isValid()</code> method
  * for {@link Geometry}s.
  * See the documentation for the various geometry types for a specification of validity.
  *
@@ -49,6 +49,17 @@ import com.vividsolutions.jts.util.*;
  */
 public class IsValidOp
 {
+	/**
+	 * Tests whether a {@link Geometry} is valid.
+	 * @param geom the Geometry to test
+	 * @return true if the geometry is valid
+	 */
+	public static boolean isValid(Geometry geom)
+	{
+    IsValidOp isValidOp = new IsValidOp(geom);
+    return isValidOp.isValid();
+	}
+	
   /**
    * Checks whether a coordinate is valid for processing.
    * Coordinates are valid iff their x and y ordinates are in the
@@ -95,7 +106,6 @@ public class IsValidOp
    * (the ESRI SDE model)
    */
   private boolean isSelfTouchingRingFormingHoleValid = false;
-  private boolean isChecked = false;
   private TopologyValidationError validErr;
 
   public IsValidOp(Geometry parentGeometry)
@@ -132,12 +142,26 @@ public class IsValidOp
     isSelfTouchingRingFormingHoleValid = isValid;
   }
 
+  /**
+   * Computes the validity of the geometry,
+   * and returns <tt>true</tt> if it is valid.
+   * 
+   * @return true if the geometry is valid
+   */
   public boolean isValid()
   {
     checkValid(parentGeometry);
     return validErr == null;
   }
 
+  /**
+   * Computes the validity of the geometry,
+   * and if not valid returns the validation error for the geometry,
+   * or null if the geometry is valid.
+   * 
+   * @return the validation error, if the geometry is invalid
+   * or null if the geometry is valid
+   */
   public TopologyValidationError getValidationError()
   {
     checkValid(parentGeometry);
@@ -146,7 +170,6 @@ public class IsValidOp
 
   private void checkValid(Geometry g)
   {
-    if (isChecked) return;
     validErr = null;
 
     // empty geometries are always valid!
@@ -314,10 +337,14 @@ public class IsValidOp
 
   private void checkClosedRing(LinearRing ring)
   {
-    if (! ring.isClosed() )
+    if (! ring.isClosed() ) {
+    	Coordinate pt = null;
+    	if (ring.getNumPoints() >= 1)
+    		pt = ring.getCoordinateN(0);
       validErr = new TopologyValidationError(
                         TopologyValidationError.RING_NOT_CLOSED,
-                        ring.getCoordinateN(0));
+                        pt);
+    }
   }
 
   private void checkTooFewPoints(GeometryGraph graph)

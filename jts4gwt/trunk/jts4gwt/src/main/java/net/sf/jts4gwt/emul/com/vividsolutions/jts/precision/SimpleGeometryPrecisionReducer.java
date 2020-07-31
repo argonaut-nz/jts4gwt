@@ -37,11 +37,12 @@ import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.geom.util.*;
 
 /**
- * Reduces the precision of a {@link Geometry}
+ * Reduces the precision of the coordinates of a {@link Geometry}
  * according to the supplied {@link PrecisionModel}, without
  * attempting to preserve valid topology.
  * <p>
- * The topology of the resulting geometry may be invalid if
+ * In the case of {@link Polygonal} geometries, 
+ * the topology of the resulting geometry may be invalid if
  * topological collapse occurs due to coordinates being shifted.
  * It is up to the client to check this and handle it if necessary.
  * Collapses may not matter for some uses.  An example
@@ -49,6 +50,8 @@ import com.vividsolutions.jts.geom.util.*;
  * The buffer algorithm does not depend on the validity of the input geometry.
  *
  * @version 1.7
+ * 
+ * @deprecated use GeometryPrecisionReducer
  */
 public class SimpleGeometryPrecisionReducer
 {
@@ -91,7 +94,9 @@ public class SimpleGeometryPrecisionReducer
   /**
    * Sets whether the {@link PrecisionModel} of the new reduced Geometry
    * will be changed to be the {@link PrecisionModel} supplied to
-   * specify the reduction.  The default is to not change the precision model
+   * specify the precision reduction.
+   * <p>  
+   * The default is to <b>not</b> change the precision model
    *
    * @param changePrecisionModel if <code>true</code> the precision model of the created Geometry will be the
    * the precisionModel supplied in the constructor.

@@ -42,7 +42,7 @@ import com.vividsolutions.jts.noding.*;;
  * Detects and records an intersection between two {@link SegmentString}s,
  * if one exists.  Only a single intersection is recorded.
  * This strategy can be configured to search for proper intersections.
- * In this case, the presence of any intersection will still be recorded,
+ * In this case, the presence of <i>any</i> kind of intersection will still be recorded,
  * but searching will continue until either a proper intersection has been found
  * or no intersections are detected.
  *
@@ -137,8 +137,8 @@ public class SegmentIntersectionDetector
   /**
    * This method is called by clients
    * of the {@link SegmentIntersector} class to process
-   * intersections for two segments of the {@link SegmentStrings} being intersected.
-   * Note that some clients (such as {@link MonotoneChain}s) may optimize away
+   * intersections for two segments of the {@link SegmentString}s being intersected.
+   * Note that some clients (such as <code>MonotoneChain</code>s) may optimize away
    * this call for segment pairs which they have determined do not intersect
    * (e.g. by an disjoint envelope test).
    */
