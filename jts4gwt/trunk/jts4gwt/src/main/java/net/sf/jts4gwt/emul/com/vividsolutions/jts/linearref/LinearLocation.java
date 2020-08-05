@@ -1,3 +1,36 @@
+/*
+* The JTS Topology Suite is a collection of Java classes that
+* implement the fundamental operations required to validate a given
+* geo-spatial data set to a known topological specification.
+*
+* Copyright (C) 2001 Vivid Solutions
+*
+* This library is free software; you can redistribute it and/or
+* modify it under the terms of the GNU Lesser General Public
+* License as published by the Free Software Foundation; either
+* version 2.1 of the License, or (at your option) any later version.
+*
+* This library is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+* Lesser General Public License for more details.
+*
+* You should have received a copy of the GNU Lesser General Public
+* License along with this library; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*
+* For more information, contact:
+*
+*     Vivid Solutions
+*     Suite #1A
+*     2328 Government Street
+*     Victoria BC  V8T 5G5
+*     Canada
+*
+*     (250)385-6040
+*     www.vividsolutions.com
+*/
+
 package com.vividsolutions.jts.linearref;
 
 import com.vividsolutions.jts.geom.*;
@@ -73,6 +106,18 @@ public class LinearLocation
     this.segmentIndex = segmentIndex;
     this.segmentFraction = segmentFraction;
     normalize();
+  }
+
+  /**
+   * Creates a new location equal to a given one.
+   * 
+   * @param loc a LinearLocation
+   */
+  public LinearLocation(LinearLocation loc)
+  {
+    this.componentIndex = loc.componentIndex;
+    this.segmentIndex = loc.segmentIndex;
+    this.segmentFraction = loc.segmentFraction;
   }
 
   /**
@@ -170,9 +215,9 @@ public class LinearLocation
 
   /**
    * Sets the value of this location to
-   * refer the end of a linear geometry
+   * refer to the end of a linear geometry.
    *
-   * @param linear the linear geometry to set
+   * @param linear the linear geometry to use to set the end
    */
   public void setToEnd(Geometry linear)
   {
@@ -218,7 +263,7 @@ public class LinearLocation
    * given linear {@link Geometry} which is
    * referenced by this location.
    *
-   * @param linearGeom a linear geometry
+   * @param linearGeom the linear geometry referenced by this location
    * @return the <tt>Coordinate</tt> at the location
    */
   public Coordinate getCoordinate(Geometry linearGeom)
@@ -371,6 +416,22 @@ public class LinearLocation
   }
 
   /**
+   * Tests whether this location is an endpoint of
+   * the linear component it refers to.
+   * 
+   * @param linearGeom the linear geometry referenced by this location
+   * @return true if the location is a component endpoint
+   */
+  public boolean isEndpoint(Geometry linearGeom)
+  {
+    LineString lineComp = (LineString) linearGeom.getGeometryN(componentIndex);
+    // check for endpoint
+    int nseg = lineComp.getNumPoints() - 1;
+    return segmentIndex >= nseg
+        || (segmentIndex == nseg && segmentFraction >= 1.0);
+  }
+    
+  /**
    * Copies this location
    *
    * @return a copy of this location
@@ -378,5 +439,13 @@ public class LinearLocation
   public Object clone()
   {
     return new LinearLocation(componentIndex, segmentIndex, segmentFraction);
+  }
+  
+  public String toString()
+  {
+    return "LinearLoc[" 
+    + componentIndex + ", "
+    + segmentIndex + ", "
+    + segmentFraction + "]";
   }
 }

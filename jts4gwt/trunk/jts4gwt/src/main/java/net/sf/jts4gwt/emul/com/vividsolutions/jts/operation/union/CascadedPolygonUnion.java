@@ -41,18 +41,25 @@ import com.vividsolutions.jts.index.strtree.STRtree;
 /**
  * Provides an efficient method of unioning a collection of 
  * {@link Polygonal} geometrys.
- * This algorithm is faster and likely more robust than
+ * The geometries are indexed using a spatial index, 
+ * and unioned recursively in index order.
+ * For geometries with a high degree of overlap,
+ * this has the effect of reducing the number of vertices
+ * early in the process, which increases speed
+ * and robustness.
+ * <p>
+ * This algorithm is faster and more robust than
  * the simple iterated approach of 
  * repeatedly unioning each polygon to a result geometry.
  * <p>
  * The <tt>buffer(0)</tt> trick is sometimes faster, but can be less robust and 
- * can sometimes take an exceptionally long time to complete.
+ * can sometimes take a long time to complete.
  * This is particularly the case where there is a high degree of overlap
  * between the polygons.  In this case, <tt>buffer(0)</tt> is forced to compute
  * with <i>all</i> line segments from the outset, 
  * whereas cascading can eliminate many segments
  * at each stage of processing.
- * The best case for buffer(0) is the trivial case
+ * The best situation for using <tt>buffer(0)</tt> is the trivial case
  * where there is <i>no</i> overlap between the input geometries. 
  * However, this case is likely rare in practice.
  * 
@@ -80,7 +87,7 @@ public class CascadedPolygonUnion
 	 * Creates a new instance to union
 	 * the given collection of {@link Geometry}s.
 	 * 
-	 * @param geoms a collection of {@link Polygonal} {@link Geometry}s
+	 * @param polys a collection of {@link Polygonal} {@link Geometry}s
 	 */
 	public CascadedPolygonUnion(Collection polys)
 	{
@@ -100,7 +107,7 @@ public class CascadedPolygonUnion
 	 * Computes the union of the input geometries.
 	 * 
 	 * @return the union of the input geometries
-	 * @return null if no input geometries were provided
+	 * or null if no input geometries were provided
 	 */
 	public Geometry union()
 	{
@@ -197,9 +204,9 @@ public class CascadedPolygonUnion
    * Unions a section of a list using a recursive binary union on each half
    * of the section.
    * 
-   * @param geoms
-   * @param start
-   * @param end
+   * @param geoms the list of geometries containing the section to union
+   * @param start the start index of the section
+   * @param end the index after the end of the section
    * @return the union of the list section
    */
   private Geometry binaryUnion(List geoms, int start, int end)
@@ -220,6 +227,15 @@ public class CascadedPolygonUnion
   	}
   }
   
+  /**
+   * Gets the element at a given list index, or
+   * null if the index is out of range.
+   * 
+   * @param list
+   * @param index
+   * @return the geometry at the given index
+   * or null if the index is out of range
+   */
   private static Geometry getGeometry(List list, int index)
   {
   	if (index >= list.size()) return null;
@@ -252,12 +268,12 @@ public class CascadedPolygonUnion
   
   /**
    * Computes the union of two geometries, 
-   * either of both of which may be null.
+   * either or both of which may be null.
    * 
    * @param g0 a Geometry
    * @param g1 a Geometry
    * @return the union of the input(s)
-   * @return null if both inputs are null
+   * or null if both inputs are null
    */
   private Geometry unionSafe(Geometry g0, Geometry g1)
   {
@@ -268,8 +284,6 @@ public class CascadedPolygonUnion
   		return (Geometry) g1.clone();
   	if (g1 == null)
   		return (Geometry) g0.clone();
-  	
-  	// what if both are null?  Maybe return empty GC?
   	
   	return unionOptimized(g0, g1);
   }
@@ -304,7 +318,8 @@ public class CascadedPolygonUnion
   
   
   /**
-   * Unions two polygonal geometries.
+   * Unions two polygonal geometries, restricting computation 
+   * to the envelope intersection where possible.
    * The case of MultiPolygons is optimized to union only 
    * the polygons which lie in the intersection of the two geometry's envelopes.
    * Polygons outside this region can simply be combined with the union result,
@@ -366,6 +381,30 @@ public class CascadedPolygonUnion
   	*/
   	
   	//return bufferUnion(g0, g1);
-  	return g0.union(g1);
+  	return restrictToPolygons(g0.union(g1));
+  }
+  
+  /**
+   * Computes a {@link Geometry} containing only {@link Polygonal} components.
+   * Extracts the {@link Polygon}s from the input 
+   * and returns them as an appropriate {@link Polygonal} geometry.
+   * <p>
+   * If the input is already <tt>Polygonal</tt>, it is returned unchanged.
+   * <p>
+   * A particular use case is to filter out non-polygonal components
+   * returned from an overlay operation.  
+   * 
+   * @param g the geometry to filter
+   * @return a Polygonal geometry
+   */
+  private static Geometry restrictToPolygons(Geometry g)
+  {
+    if (g instanceof Polygonal) {
+      return g;
+    }
+    List polygons = PolygonExtracter.getPolygons(g);
+    if (polygons.size() == 1) 
+      return (Polygon) polygons.get(0);
+    return g.getFactory().createMultiPolygon(GeometryFactory.toPolygonArray(polygons));
   }
 }

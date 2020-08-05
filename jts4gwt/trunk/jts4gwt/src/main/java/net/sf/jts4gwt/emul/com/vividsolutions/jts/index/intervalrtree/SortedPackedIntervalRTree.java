@@ -70,7 +70,7 @@ public class SortedPackedIntervalRTree
    * @param max the upper bound of the item interval
    * @param item the item to insert
    * 
-   * @throw IllegalStateException if the index has already been queried
+   * @throws IllegalStateException if the index has already been queried
    */
 	public void insert(double min, double max, Object item)
 	{
@@ -82,11 +82,18 @@ public class SortedPackedIntervalRTree
   private void init()
   {
     if (root != null) return;
+    buildRoot();
+  }
+  
+  private synchronized void buildRoot() 
+  {
+    if (root != null) return;
     root = buildTree();
   }
   
-	private IntervalRTreeNode buildTree()
+	private  IntervalRTreeNode buildTree()
 	{
+	  
     // sort the leaf nodes
     Collections.sort(leaves, new IntervalRTreeNode.NodeComparator());
     

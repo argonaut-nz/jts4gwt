@@ -36,7 +36,7 @@ package com.vividsolutions.jts.geom;
 
 /**
  * Models an OGC SFS <code>LinearRing</code>.
- * A LinearRing is a LineString which is both closed and simple.
+ * A <code>LinearRing</code> is a {@link LineString} which is both closed and simple.
  * In other words,
  * the first and last coordinate in the ring must be equal,
  * and the interior of the ring must not self-intersect.
@@ -51,6 +51,12 @@ package com.vividsolutions.jts.geom;
  */
 public class LinearRing extends LineString
 {
+  /**
+   * The minimum number of vertices allowed in a valid non-empty ring (= 4).
+   * Empty rings with 0 vertices are also valid.
+   */
+  public static final int MINIMUM_VALID_SIZE = 4;
+  
   private static final long serialVersionUID = -4261142084085851829L;
 
   /**
@@ -104,7 +110,7 @@ public class LinearRing extends LineString
     if (!isEmpty() && ! super.isClosed()) {
       throw new IllegalArgumentException("Points of LinearRing do not form a closed linestring");
     }
-    if (getCoordinateSequence().size() >= 1 && getCoordinateSequence().size() <= 3) {
+    if (getCoordinateSequence().size() >= 1 && getCoordinateSequence().size() < MINIMUM_VALID_SIZE) {
       throw new IllegalArgumentException("Invalid number of points in LinearRing (found " 
       		+ getCoordinateSequence().size() + " - must be 0 or >= 4)");
     }
@@ -121,14 +127,19 @@ public class LinearRing extends LineString
   }
 
   /**
-   * Returns <code>true</code>, since by definition LinearRings are always simple.
-   * @return <code>true</code>
-   *
-   * @see Geometry#isSimple
+   * Tests whether this ring is closed.
+   * Empty rings are closed by definition.
+   * 
+   * @return true if this ring is closed
    */
-  public boolean isSimple() {
-    return true;
+  public boolean isClosed() {
+    if (isEmpty()) {
+    	// empty LinearRings are closed by definition
+      return true;
+    }
+    return super.isClosed();
   }
+
 
   public String getGeometryType() {
     return "LinearRing";

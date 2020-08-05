@@ -41,13 +41,14 @@ import com.vividsolutions.jts.noding.*;
 /**
  * Uses Snap Rounding to compute a rounded,
  * fully noded arrangement from a set of {@link SegmentString}s.
- * Implements the Snap Rounding technique described in Hobby, Guibas & Marimont,
- * and Goodrich et al.
- * Snap Rounding assumes that all vertices lie on a uniform grid
- * (hence the precision model of the input must be fixed precision,
- * and all the input vertices must be rounded to that precision).
+ * Implements the Snap Rounding technique described in 
+ * the papers by Hobby, Guibas & Marimont, and Goodrich et al.
+ * Snap Rounding assumes that all vertices lie on a uniform grid;
+ * hence the precision model of the input must be fixed precision,
+ * and all the input vertices must be rounded to that precision.
  * <p>
  * This implementation uses simple iteration over the line segments.
+ * This is not the most efficient approach for large sets of segments.
  * <p>
  * This implementation appears to be fully robust using an integer precision model.
  * It will function with non-integer precision models, but the
@@ -70,11 +71,18 @@ public class SimpleSnapRounder
     scaleFactor = pm.getScale();
   }
 
+  /**
+	 * @return a Collection of NodedSegmentStrings representing the substrings
+	 * 
+	 */
   public Collection getNodedSubstrings()
   {
     return  NodedSegmentString.getNodedSubstrings(nodedSegStrings);
   }
 
+  /**
+   * @param inputSegmentStrings a Collection of NodedSegmentStrings
+   */
   public void computeNodes(Collection inputSegmentStrings)
   {
     this.nodedSegStrings = inputSegmentStrings;
@@ -103,7 +111,7 @@ public class SimpleSnapRounder
 
   /**
    * Computes all interior intersections in the collection of {@link SegmentString}s,
-   * and returns their @link Coordinate}s.
+   * and returns their {@link Coordinate}s.
    *
    * Does NOT node the segStrings.
    *
@@ -146,7 +154,7 @@ public class SimpleSnapRounder
    * Computes nodes introduced as a result of
    * snapping segments to vertices of other segments
    *
-   * @param segStrings the list of segment strings to snap together
+   * @param edges the list of segment strings to snap together
    */
   public void computeVertexSnaps(Collection edges)
   {
@@ -184,33 +192,4 @@ public class SimpleSnapRounder
     }
   }
 
-  /**
-   * Adds a new node (equal to the snap pt) to the segment
-   * if the segment passes through the hot pixel
-   *
-   * @param hotPix
-   * @param segStr
-   * @param segIndex
-   * @return <code>true</code> if a node was added
-   */
-  /* refactored to HotPixel
-  public static boolean addSnappedNode(
-      HotPixel hotPix,
-      NodedSegmentString segStr,
-      int segIndex
-      )
-  {
-    Coordinate p0 = segStr.getCoordinate(segIndex);
-    Coordinate p1 = segStr.getCoordinate(segIndex + 1);
-
-    if (hotPix.intersects(p0, p1)) {
-      //System.out.println("snapped: " + snapPt);
-      //System.out.println("POINT (" + snapPt.x + " " + snapPt.y + ")");
-      segStr.addIntersection(hotPix.getCoordinate(), segIndex);
-
-      return true;
-    }
-    return false;
-  }
-*/
 }

@@ -86,7 +86,7 @@ public class NodingValidator {
   {
     if (p0.equals(p2))
       throw new RuntimeException("found non-noded collapse at "
-                                 + p0 + p1 + p2);
+                                 + Debug.toLine(p0, p1, p2));
   }
 
   /**

@@ -63,8 +63,9 @@ public class DelaunayTriangulationBuilder
 	
 	public static CoordinateList unique(Coordinate[] coords)
 	{
-		Arrays.sort(coords);
-		CoordinateList coordList = new CoordinateList(coords, false);
+	  Coordinate[] coordsCopy = CoordinateArrays.copyDeep(coords);
+		Arrays.sort(coordsCopy);
+		CoordinateList coordList = new CoordinateList(coordsCopy, false);
 		return coordList;
 	}
 	
@@ -112,7 +113,7 @@ public class DelaunayTriangulationBuilder
 	}
 	
 	/**
-	 * Sets the sites (point or vertices) which will be triangulated.
+	 * Sets the sites (vertices) which will be triangulated.
 	 * All vertices of the given geometry will be used as sites.
 	 * 
 	 * @param geom the geometry from which the sites will be extracted.
@@ -124,10 +125,10 @@ public class DelaunayTriangulationBuilder
 	}
 	
 	/**
-	 * Sets the sites (point or vertices) which will be triangulated
+	 * Sets the sites (vertices) which will be triangulated
 	 * from a collection of {@link Coordinate}s.
 	 * 
-	 * @param geom a collection of Coordinates.
+	 * @param coords a collection of Coordinates.
 	 */
 	public void setSites(Collection coords)
 	{

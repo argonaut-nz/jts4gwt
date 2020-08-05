@@ -33,8 +33,17 @@
 package com.vividsolutions.jts.operation.buffer;
 
 /**
- * Contains the parameters which 
- * describe how a buffer should be constructed.
+ * A value class containing the parameters which 
+ * specify how a buffer should be constructed.
+ * <p>
+ * The parameters allow control over:
+ * <ul>
+ * <li>Quadrant segments (accuracy of approximation for circular arcs)
+ * <li>End Cap style
+ * <li>Join style
+ * <li>Mitre limit
+ * <li>whether the buffer is single-sided
+ * </ul>
  * 
  * @author Martin Davis
  *
@@ -86,7 +95,8 @@ public class BufferParameters
   private int endCapStyle = CAP_ROUND;
   private int joinStyle = JOIN_ROUND;
   private double mitreLimit = DEFAULT_MITRE_LIMIT;
-
+  private boolean isSingleSided = false;
+  
   /**
    * Creates a default set of parameters
    *
@@ -170,7 +180,7 @@ public class BufferParameters
    * (in other words, the computed buffer curve is always inside the true
    * curve).
    * 
-   * @param quadrantSegments the number of segments in a fillet for a quadrant
+   * @param quadSegs the number of segments in a fillet for a quadrant
    */
   public void setQuadrantSegments(int quadSegs)
   {
@@ -231,7 +241,7 @@ public class BufferParameters
   
   /**
    * Specifies the end cap style of the generated buffer.
-   * The styles supported are {@link #CAP_ROUND}, {@link #CAP_BUTT}, and {@link #CAP_SQUARE}.
+   * The styles supported are {@link #CAP_ROUND}, {@link #CAP_FLAT}, and {@link #CAP_SQUARE}.
    * The default is CAP_ROUND.
    *
    * @param endCapStyle the end cap style to specify
@@ -253,8 +263,8 @@ public class BufferParameters
   
   /**
    * Sets the join style for outside (reflex) corners between line segments.
-   * Allowable values are {@link JOIN_ROUND} (which is the default),
-   * {@link JOIN_MITRE} and {link JOIN_BEVEL}.
+   * Allowable values are {@link #JOIN_ROUND} (which is the default),
+   * {@link #JOIN_MITRE} and {link JOIN_BEVEL}.
    * 
    * @param joinStyle the code for the join style
    */
@@ -291,4 +301,35 @@ public class BufferParameters
     this.mitreLimit = mitreLimit;
   }
 
+  /**
+   * Sets whether the computed buffer should be single-sided.
+   * A single-sided buffer is constructed on only one side of each input line.
+   * <p>
+   * The side used is determined by the sign of the buffer distance:
+   * <ul>
+   * <li>a positive distance indicates the left-hand side
+   * <li>a negative distance indicates the right-hand side
+   * </ul>
+   * The single-sided buffer of point geometries is 
+   * the same as the regular buffer.
+   * <p>
+   * The End Cap Style for single-sided buffers is 
+   * always ignored, 
+   * and forced to the equivalent of <tt>CAP_FLAT</tt>. 
+   * 
+   * @param isSingleSided true if a single-sided buffer should be constructed
+   */
+  public void setSingleSided(boolean isSingleSided)
+  {
+    this.isSingleSided = isSingleSided;
+  }
+
+  /**
+   * Tests whether the buffer is to be generated on a single side only.
+   * 
+   * @return true if the generated buffer is to be single-sided
+   */
+  public boolean isSingleSided() {
+    return isSingleSided;
+  }
 }

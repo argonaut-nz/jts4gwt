@@ -64,6 +64,14 @@ public class Coordinate implements Comparable, Cloneable, Serializable {
    * greater than the defined dimension of a coordinate.
    */
   public static final double NULL_ORDINATE = Double.NaN;
+  
+  /**
+   * Standard ordinate index values
+   */
+  public static final int X = 0;
+  public static final int Y = 1;
+  public static final int Z = 2;
+
   /**
    *  The x-coordinate.
    */
@@ -117,8 +125,6 @@ public class Coordinate implements Comparable, Cloneable, Serializable {
     this(x, y, NULL_ORDINATE);
   }
 
-
-
   /**
    *  Sets this <code>Coordinate</code>s (x,y,z) values to that of <code>other</code>.
    *
@@ -128,6 +134,52 @@ public class Coordinate implements Comparable, Cloneable, Serializable {
     x = other.x;
     y = other.y;
     z = other.z;
+  }
+
+  /**
+   * Gets the ordinate value for the given index.
+   * The supported values for the index are 
+   * {@link X}, {@link Y}, and {@link Z}.
+   * 
+   * @param ordinateIndex the ordinate index
+   * @return the value of the ordinate
+   * @throws IllegalArgumentException if the index is not valid
+   */
+  public double getOrdinate(int ordinateIndex)
+  {
+    switch (ordinateIndex) {
+    case X: return x;
+    case Y: return y;
+    case Z: return z;
+    }
+    throw new IllegalArgumentException("Invalid ordinate index: " + ordinateIndex);
+  }
+  
+  /**
+   * Sets the ordinate for the given index
+   * to a given value.
+   * The supported values for the index are 
+   * {@link X}, {@link Y}, and {@link Z}.
+   * 
+   * @param ordinateIndex the ordinate index
+   * @param value the value to set
+   * @throws IllegalArgumentException if the index is not valid
+   */
+  public void setOrdinate(int ordinateIndex, double value)
+  {
+    switch (ordinateIndex) {
+      case X:
+        x = value;
+        break;
+      case Y:
+        y = value;
+        break;
+      case Z:
+        z = value;
+        break;
+      default:
+        throw new IllegalArgumentException("Invalid ordinate index: " + ordinateIndex);
+    }
   }
 
   /**
@@ -221,15 +273,16 @@ public class Coordinate implements Comparable, Cloneable, Serializable {
   public Object clone() {
 //    try {
 //      Coordinate coord = (Coordinate) super.clone();
-    	Coordinate coord = (Coordinate) new Coordinate(x, y, z);
-
-      return coord; // return the clone
+//
+//      return coord; // return the clone
 //    } catch (CloneNotSupportedException e) {
 //      Assert.shouldNeverReachHere(
 //          "this shouldn't happen because this class is Cloneable");
 //
 //      return null;
 //    }
+      Coordinate coord = new Coordinate(X, Y, Z);
+      return coord;
   }
 
   /**
@@ -314,7 +367,7 @@ public class Coordinate implements Comparable, Cloneable, Serializable {
      * Creates a comparator for 2 or 3 dimensional coordinates, depending
      * on the value provided.
      *
-     * @param dimensionLimit the number of dimensions to test
+     * @param dimensionsToTest the number of dimensions to test
      */
     public DimensionalComparator(int dimensionsToTest)
     {

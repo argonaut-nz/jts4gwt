@@ -32,23 +32,27 @@
  */
 package com.vividsolutions.jts.io;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.CoordinateSequence;
-import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.*;
+
+import com.vividsolutions.jts.util.*;
 
 /**
- * Outputs the Well-Known Text representation of a {@link Geometry}.
- * The Well-known Text format is defined in the
- * <A HREF="http://www.opengis.org/techno/specs.htm">
- * OGC Simple Features Specification for SQL</A>.
+ * Writes the Well-Known Text representation of a {@link Geometry}.
+ * The Well-Known Text format is defined in the
+ * OGC <A HREF="http://www.opengis.org/techno/specs.htm">
+ * <i>Simple Features Specification for SQL</i></A>.
+ * See {@link WKTReader} for a formal specification of the format syntax.
  * <p>
  * The <code>WKTWriter</code> outputs coordinates rounded to the precision
- * model. No more than the maximum number of necessary decimal places will be
+ * model. Only the maximum number of decimal places 
+ * necessary to represent the ordinates to the required precision will be
  * output.
  * <p>
- * A non-standard <code>LINEARRING</code> tag is used for LinearRings.
- * The SFS WKT spec does not define a special tag for <code>LinearRing</code>s.
- * Under it, rings are output using <code>LINESTRING</code>.
+ * The SFS WKT spec does not define a special tag for {@link LinearRing}s.
+ * Under the spec, rings are output as <code>LINESTRING</code>s.
+ * In order to allow precisely specifying constructed geometries, 
+ * JTS also supports a non-standard <code>LINEARRING</code> tag which is used 
+ * to output LinearRings.
  *
  * @version 1.7
  * @see WKTReader
@@ -56,7 +60,8 @@ import com.vividsolutions.jts.geom.Geometry;
 public class WKTWriter
 {
   /**
-   * Generates the WKT for a <code>Point</code>.
+   * Generates the WKT for a <tt>POINT</tt>
+   * specified by a {@link Coordinate}.
    *
    * @param p0 the point coordinate
    *
@@ -68,11 +73,12 @@ public class WKTWriter
   }
 
   /**
-   * Generates the WKT for a N-point <code>LineString</code>.
+   * Generates the WKT for a <tt>LINESTRING</tt>
+   * specified by a {@link CoordinateSequence}.
    *
-   * @param seq the sequence to outpout
+   * @param seq the sequence to write
    *
-   * @return the WKT
+   * @return the WKT string
    */
   public static String toLineString(CoordinateSequence seq)
   {
@@ -93,7 +99,8 @@ public class WKTWriter
   }
 
   /**
-   * Generates the WKT for a 2-point <code>LineString</code>.
+   * Generates the WKT for a <tt>LINESTRING</tt>
+   * specified by two {@link Coordinate}s.
    *
    * @param p0 the first coordinate
    * @param p1 the second coordinate
@@ -123,8 +130,9 @@ public class WKTWriter
 //    // specify decimal separator explicitly to avoid problems in other locales
 //    DecimalFormatSymbols symbols = new DecimalFormatSymbols();
 //    symbols.setDecimalSeparator('.');
-//    return new DecimalFormat("0" + (decimalPlaces > 0 ? "." : "")
-//                 +  stringOfChar('#', decimalPlaces), symbols);
+//    String fmtString = "0" + (decimalPlaces > 0 ? "." : "")
+//                 +  stringOfChar('#', decimalPlaces);
+//    return new DecimalFormat(fmtString, symbols);
 //  }
 
   /**
@@ -172,7 +180,7 @@ public class WKTWriter
     if (outputDimension < 2 || outputDimension > 3)
       throw new IllegalArgumentException("Invalid output dimension (must be 2 or 3)");
   }
-//
+
 //  /**
 //   * Sets whether the output will be formatted.
 //   *
@@ -232,8 +240,6 @@ public class WKTWriter
 //   *  Converts a <code>Geometry</code> to its Well-known Text representation.
 //   *
 //   *@param  geometry  a <code>Geometry</code> to process
-//   *@return           a <Geometry Tagged Text> string (see the OpenGIS Simple
-//   *      Features Specification)
 //   */
 //  public void write(Geometry geometry, Writer writer)
 //    throws IOException
@@ -265,8 +271,6 @@ public class WKTWriter
 //   *  well-known text more readable.
 //   *
 //   *@param  geometry  a <code>Geometry</code> to process
-//   *@return           a <Geometry Tagged Text> string (see the OpenGIS Simple
-//   *      Features Specification), with newlines and spaces
 //   */
 //  public void writeFormatted(Geometry geometry, Writer writer)
 //    throws IOException
@@ -277,8 +281,6 @@ public class WKTWriter
 //   *  Converts a <code>Geometry</code> to its Well-known Text representation.
 //   *
 //   *@param  geometry  a <code>Geometry</code> to process
-//   *@return           a <Geometry Tagged Text> string (see the OpenGIS Simple
-//   *      Features Specification)
 //   */
 //  private void writeFormatted(Geometry geometry, boolean useFormatting, Writer writer)
 //    throws IOException
@@ -626,7 +628,9 @@ public class WKTWriter
 //          writer.write(", ");
 //          indentCoords(i, level + 1, writer);
 //        }
+//        writer.write("(");
 //        appendCoordinate(((Point) multiPoint.getGeometryN(i)).getCoordinate(), writer);
+//        writer.write(")");
 //     }
 //      writer.write(")");
 //    }

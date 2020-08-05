@@ -34,6 +34,7 @@
 package com.vividsolutions.jts.triangulate.quadedge;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.vividsolutions.jts.algorithm.CGAlgorithms;
@@ -137,7 +138,7 @@ public class QuadEdgeTriangle
 	 * index.
 	 * 
 	 * @param index
-	 * @return
+	 * @return the next index
 	 */
 	public static int nextIndex(int index) {
 		return index = (index + 1) % 3;
@@ -152,14 +153,13 @@ public class QuadEdgeTriangle
 	 * @param edge an array of the edges of the triangle in CCW order
 	 */
 	public QuadEdgeTriangle(QuadEdge[] edge) {
-		this.edge = new QuadEdge[edge.length];
-		for (int i = 0; i < edge.length; i++)
-			this.edge[i] = edge[i];
-		// this.edge = (QuadEdge[]) edge.clone();
-		// link the quadedges back to this triangle
-    for (int i = 0; i < 3; i++) {
-      edge[i].setData(this);
-    }
+//		this.edge = (QuadEdge[]) edge.clone();
+        this.edge = Arrays.copyOf(edge, edge.length);
+
+        // link the quadedges back to this triangle
+        for (int i = 0; i < 3; i++) {
+          edge[i].setData(this);
+        }
 	}
 
   /**
@@ -223,7 +223,7 @@ public class QuadEdgeTriangle
 	 * @param e
 	 *          a QuadEdge
 	 * @return the index of the edge in this triangle
-	 * @return -1 if the edge is not an edge of this triangle
+	 * or -1 if the edge is not an edge of this triangle
 	 */
 	public int getEdgeIndex(QuadEdge e) {
 		for (int i = 0; i < 3; i++) {
@@ -239,7 +239,7 @@ public class QuadEdgeTriangle
 	 * @param v
 	 *          the vertex to find the edge for
 	 * @return the index of the edge starting at the vertex
-	 * @return -1 if the vertex is not in the triangle
+	 * or -1 if the vertex is not in the triangle
 	 */
 	public int getEdgeIndex(Vertex v) {
 		for (int i = 0; i < 3; i++) {

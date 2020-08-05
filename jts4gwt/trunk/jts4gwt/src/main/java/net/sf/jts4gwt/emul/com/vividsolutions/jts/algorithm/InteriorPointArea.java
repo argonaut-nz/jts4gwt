@@ -46,11 +46,12 @@ import com.vividsolutions.jts.geom.*;
  *       will be lines and points)
  * </ul>
  *
- * <b>
- * Note: If a fixed precision model is used,
+ * <h3>KNOWN BUGS</h3>
+ * <ul>
+ * <li>If a fixed precision model is used,
  * in some cases this method may return a point
  * which does not lie in the interior.
- * </b>
+ * </ul>
  *
  * @version 1.7
  */
@@ -98,8 +99,6 @@ public class InteriorPointArea {
   /**
    * Finds a reasonable point at which to label a Geometry.
    * @param geometry the geometry to analyze
-   * @return the midpoint of the largest intersection between the geometry and
-   * a line halfway down its envelope
    */
   public void addPolygon(Geometry geometry) {
       LineString bisector = horizontalBisector(geometry);

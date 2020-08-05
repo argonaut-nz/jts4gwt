@@ -102,4 +102,79 @@ public class CoordinateSequences {
 			dest.setOrdinate(destPos, dim, src.getOrdinate(srcPos, dim));
 		}
   }
+  
+  /**
+   * Tests whether a {@link CoordinateSequence} forms a valid {@link LinearRing},
+   * by checking the sequence length and closure
+   * (whether the first and last points are identical in 2D). 
+   * Self-intersection is not checked.
+   * 
+   * @param seq the sequence to test
+   * @return true if the sequence is a ring
+   * @see LinearRing
+   */
+  public static boolean isRing(CoordinateSequence seq) 
+  {
+  	int n = seq.size();
+  	if (n == 0) return true;
+  	// too few points
+  	if (n <= 3) 
+  		return false;
+  	// test if closed
+  	return seq.getOrdinate(0, CoordinateSequence.X) == seq.getOrdinate(n-1, CoordinateSequence.X)
+  		&& seq.getOrdinate(0, CoordinateSequence.Y) == seq.getOrdinate(n-1, CoordinateSequence.Y);
+  }
+  
+  /**
+   * Ensures that a CoordinateSequence forms a valid ring, 
+   * returning a new closed sequence of the correct length if required.
+   * If the input sequence is already a valid ring, it is returned 
+   * without modification.
+   * If the input sequence is too short or is not closed, 
+   * it is extended with one or more copies of the start point.
+   * 
+   * @param fact the CoordinateSequenceFactory to use to create the new sequence
+   * @param seq the sequence to test
+   * @return the original sequence, if it was a valid ring, or a new sequence which is valid.
+   */
+  public static CoordinateSequence ensureValidRing(CoordinateSequenceFactory fact, CoordinateSequence seq)
+  {
+  	int n = seq.size();
+  	// empty sequence is valid
+  	if (n == 0) return seq; 
+  	// too short - make a new one
+  	if (n <= 3) 
+  		return createClosedRing(fact, seq, 4);
+  	
+  	boolean isClosed = seq.getOrdinate(0, CoordinateSequence.X) == seq.getOrdinate(n-1, CoordinateSequence.X)
+		&& seq.getOrdinate(0, CoordinateSequence.Y) == seq.getOrdinate(n-1, CoordinateSequence.Y);
+  	if (isClosed) return seq;
+  	// make a new closed ring
+  	return createClosedRing(fact, seq, n+1);
+  }
+  
+  private static CoordinateSequence createClosedRing(CoordinateSequenceFactory fact, CoordinateSequence seq, int size)
+  {
+    CoordinateSequence newseq = fact.create(size, seq.getDimension());
+    int n = seq.size();
+    copy(seq, 0, newseq, 0, n);
+    // fill remaining coordinates with start point
+    for (int i = n; i < size; i++)
+      copy(seq, 0, newseq, i, 1);
+    return newseq;
+  }
+  
+  public static CoordinateSequence extend(CoordinateSequenceFactory fact, CoordinateSequence seq, int size)
+  {
+    CoordinateSequence newseq = fact.create(size, seq.getDimension());
+    int n = seq.size();
+    copy(seq, 0, newseq, 0, n);
+    // fill remaining coordinates with end point, if it exists
+    if (n > 0) {
+      for (int i = n; i < size; i++)
+        copy(seq, n-1, newseq, i, 1);
+    }
+    return newseq;
+  }
+  
 }

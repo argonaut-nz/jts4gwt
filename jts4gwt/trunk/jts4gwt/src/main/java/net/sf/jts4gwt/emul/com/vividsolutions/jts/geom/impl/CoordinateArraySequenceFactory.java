@@ -1,4 +1,3 @@
-
 /*
 * The JTS Topology Suite is a collection of Java classes that
 * implement the fundamental operations required to validate a given
@@ -30,7 +29,7 @@
 *
 *     (250)385-6040
 *     www.vividsolutions.com
- */
+*/
 package com.vividsolutions.jts.geom.impl;
 
 import java.io.Serializable;
@@ -89,6 +88,6 @@ public final class CoordinateArraySequenceFactory
   public CoordinateSequence create(int size, int dimension) {
     if (dimension > 3)
       throw new IllegalArgumentException("dimension must be <= 3");
-    return new CoordinateArraySequence(size);
+    return new CoordinateArraySequence(size, dimension);
   }
 }
