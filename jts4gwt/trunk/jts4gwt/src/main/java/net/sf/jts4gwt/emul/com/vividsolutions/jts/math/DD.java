@@ -249,13 +249,14 @@ public strictfp final class DD
    */
   public Object clone()
   {
-    try {
-      return super.clone();
-    }
-    catch (CloneNotSupportedException ex) {
-      // should never reach here
-      return null;
-    }
+//    try {
+//      return super.clone();
+//    }
+//    catch (CloneNotSupportedException ex) {
+//      // should never reach here
+//      return null;
+//    }
+      return copy(this);
   }
   
   private final void init(double x)

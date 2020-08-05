@@ -271,16 +271,18 @@ public class Coordinate implements Comparable, Cloneable, Serializable {
   }
 
   public Object clone() {
-    try {
-      Coordinate coord = (Coordinate) super.clone();
-
-      return coord; // return the clone
-    } catch (CloneNotSupportedException e) {
-      Assert.shouldNeverReachHere(
-          "this shouldn't happen because this class is Cloneable");
-
-      return null;
-    }
+//    try {
+//      Coordinate coord = (Coordinate) super.clone();
+//
+//      return coord; // return the clone
+//    } catch (CloneNotSupportedException e) {
+//      Assert.shouldNeverReachHere(
+//          "this shouldn't happen because this class is Cloneable");
+//
+//      return null;
+//    }
+      Coordinate coord = new Coordinate(X, Y, Z);
+      return coord;
   }
 
   /**

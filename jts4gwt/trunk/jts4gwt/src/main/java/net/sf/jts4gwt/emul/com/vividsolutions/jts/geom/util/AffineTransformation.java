@@ -1102,14 +1102,16 @@ public class AffineTransformation
    * Clones this transformation
    * 
    * @return a copy of this transformation
+ * @throws CloneNotSupportedException 
    */
   public Object clone()
   {
-  	try {
-  		return super.clone();
-  	} catch(Exception ex) {
-  		Assert.shouldNeverReachHere();
-  	}
-  	return null;
+//  	try {
+//  		return super.clone();
+//  	} catch(Exception ex) {
+//  		Assert.shouldNeverReachHere();
+//  	}
+//  	return null;
+      throw new UnsupportedOperationException();
   }
 }

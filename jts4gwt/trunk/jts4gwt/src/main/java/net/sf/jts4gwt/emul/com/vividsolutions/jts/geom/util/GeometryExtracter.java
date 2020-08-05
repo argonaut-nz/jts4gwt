@@ -47,8 +47,9 @@ public class GeometryExtracter
 	
 	protected static boolean isOfClass(Object o, Class clz)
 	{
-		return clz.isAssignableFrom(o.getClass());
+//		return clz.isAssignableFrom(o.getClass());
 //		return o.getClass() == clz;
+      return o.getClass().getName().equals(clz.getName());
 	}
 	
   /**

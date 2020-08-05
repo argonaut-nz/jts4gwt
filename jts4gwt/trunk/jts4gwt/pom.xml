@@ -6,7 +6,7 @@
 	<groupId>net.sf</groupId>
 	<artifactId>jts4gwt</artifactId>
 	<packaging>jar</packaging>
-	<version>1.10.2</version>
+	<version>1.13.0</version>
 	<name>jts4gwt</name>
 
 
@@ -16,7 +16,7 @@
 
 	<!-- convenience to define GWT version in one place -->
 	<properties>
-		<gwtVersion>2.3.0</gwtVersion>
+		<gwtVersion>2.8.2</gwtVersion>
 	</properties>
 
 	<dependencies>
@@ -29,7 +29,7 @@
 		<dependency>
 			<groupId>com.vividsolutions</groupId>
 			<artifactId>jts</artifactId>
-			<version>1.11</version>
+			<version>1.13</version>
 			<scope>provided</scope>
 			<!-- <scope>system</scope> <systemPath>${basedir}/lib/jts-1.10.jar</systemPath> -->
 		</dependency>

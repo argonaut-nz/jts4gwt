@@ -88,7 +88,7 @@ public class Debug {
   private static final String DEBUG_LINE_TAG = "D! ";
 
   private PrintStream out;
-  private Class[] printArgs;
+//  private Class[] printArgs;
   private Object watchObj = null;
   private Object[] args = new Object[1];
 
@@ -223,13 +223,13 @@ public class Debug {
   
   private Debug() {
     out = System.out;
-    printArgs = new Class[1];
-    try {
-      printArgs[0] = Class.forName("java.io.PrintStream");
-    }
-    catch (Exception ex) {
-      // ignore this exception - it will fail later anyway
-    }
+//    printArgs = new Class[1];
+//    try {
+//      printArgs[0] = Class.forName("java.io.PrintStream");
+//    }
+//    catch (Exception ex) {
+//      // ignore this exception - it will fail later anyway
+//    }
   }
 
 
@@ -266,22 +266,27 @@ public class Debug {
   }
   public void instancePrintObject(Object obj) {
     //if (true) throw new RuntimeException("DEBUG TRAP!");
-    Method printMethod = null;
-    try {
-      Class cls = obj.getClass();
-      try {
-        printMethod = cls.getMethod("print", printArgs);
-        args[0] = out;
-        out.print(DEBUG_LINE_TAG);
-        printMethod.invoke(obj, args);
+//    Method printMethod = null;
+//    try {
+//      Class cls = obj.getClass();
+//      try {
+//        printMethod = cls.getMethod("print", printArgs);
+//        args[0] = out;
+//        out.print(DEBUG_LINE_TAG);
+//        printMethod.invoke(obj, args);
+//      }
+//      catch (NoSuchMethodException ex) {
+//        instancePrint(obj.toString());
+//      }
+//    }
+//    catch (Exception ex) {
+//      ex.printStackTrace(out);
+//    }
+      if (obj == null) {
+          out.print("null");
+      } else {
+          out.print(obj.toString());
       }
-      catch (NoSuchMethodException ex) {
-        instancePrint(obj.toString());
-      }
-    }
-    catch (Exception ex) {
-      ex.printStackTrace(out);
-    }
   }
 
   public void println() {

@@ -37,7 +37,7 @@ import java.util.*;
 
 import com.vividsolutions.jts.algorithm.*;
 import com.vividsolutions.jts.geom.util.*;
-import com.vividsolutions.jts.io.WKTWriter;
+import com.vividsolutions.jts.io.*;
 import com.vividsolutions.jts.operation.*;
 import com.vividsolutions.jts.operation.buffer.BufferOp;
 import com.vividsolutions.jts.operation.distance.DistanceOp;
@@ -1146,8 +1146,9 @@ public abstract class Geometry
    *@return    the Well-known Text representation of this <code>Geometry</code>
    */
   public String toText() {
-    WKTWriter writer = new WKTWriter();
-    return writer.write(this);
+//    WKTWriter writer = new WKTWriter();
+//    return writer.write(this);
+      return "NOT IMPLEMENTED";
   }
 
   /**
@@ -1618,17 +1619,19 @@ public abstract class Geometry
    * their internal data.  Overrides should call this method first.
    *
    * @return a clone of this instance
+ * @throws CloneNotSupportedException 
    */
   public Object clone() {
-    try {
-      Geometry clone = (Geometry) super.clone();
-      if (clone.envelope != null) { clone.envelope = new Envelope(clone.envelope); }
-      return clone;
-    }
-    catch (CloneNotSupportedException e) {
-      Assert.shouldNeverReachHere();
-      return null;
-    }
+//    try {
+//      Geometry clone = (Geometry) super.clone();
+//      if (clone.envelope != null) { clone.envelope = new Envelope(clone.envelope); }
+//      return clone;
+//    }
+//    catch (CloneNotSupportedException e) {
+//      Assert.shouldNeverReachHere();
+//      return null;
+//    }
+	  return this;
   }
 
   /**
@@ -1874,11 +1877,28 @@ public abstract class Geometry
 		if (sortedClasses == null)
 			initSortedClasses();
 
-		for (int i = 0; i < sortedClasses.length; i++) {
-			if (sortedClasses[i].isInstance(this))
-				return i;
-		}
-		Assert.shouldNeverReachHere("Class not supported: " + this.getClass());
+		if (this instanceof Point) {
+			return 0;
+		} else if (this instanceof MultiPoint) {
+			return 1;
+  		} else if (this instanceof LineString) {
+			return 2;
+  		} else if (this instanceof LinearRing) {
+			return 3;
+  		} else if (this instanceof MultiLineString) {
+			return 4;
+  		} else if (this instanceof Polygon) {
+			return 5;
+  		} else if (this instanceof MultiPolygon) {
+			return 6;
+  		} else if (this instanceof GeometryCollection) {
+			return 7;
+  		} 
+//		for (int i = 0; i < sortedClasses.length; i++) {
+//			if (sortedClasses[i].isInstance(this))
+//				return i;
+//		}
+//		Assert.shouldNeverReachHere("Class not supported: " + this.getClass());
 		return -1;
 	}
 

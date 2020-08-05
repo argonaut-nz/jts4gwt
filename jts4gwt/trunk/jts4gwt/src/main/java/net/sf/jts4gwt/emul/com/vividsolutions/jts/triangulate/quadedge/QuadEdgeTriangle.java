@@ -34,6 +34,7 @@
 package com.vividsolutions.jts.triangulate.quadedge;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.vividsolutions.jts.algorithm.CGAlgorithms;
@@ -152,11 +153,13 @@ public class QuadEdgeTriangle
 	 * @param edge an array of the edges of the triangle in CCW order
 	 */
 	public QuadEdgeTriangle(QuadEdge[] edge) {
-		this.edge = (QuadEdge[]) edge.clone();
-		// link the quadedges back to this triangle
-    for (int i = 0; i < 3; i++) {
-      edge[i].setData(this);
-    }
+//		this.edge = (QuadEdge[]) edge.clone();
+        this.edge = Arrays.copyOf(edge, edge.length);
+
+        // link the quadedges back to this triangle
+        for (int i = 0; i < 3; i++) {
+          edge[i].setData(this);
+        }
 	}
 
   /**
