@@ -39,7 +39,7 @@ package com.vividsolutions.jts.util;
  */
 import java.io.*;
 import java.util.*;
-import java.lang.reflect.*;
+//import java.lang.reflect.*;
 import com.vividsolutions.jts.geom.*;
 
 /**
@@ -63,7 +63,7 @@ public class Debug {
   private static boolean debugOn = false;
 
   static {
-    String debugValue = System.getProperty(DEBUG_PROPERTY_NAME);
+    String debugValue = System.getProperty("jts.debug", null);
     if (debugValue != null) {
       if (debugValue.equalsIgnoreCase(DEBUG_PROPERTY_VALUE_ON)
           || debugValue.equalsIgnoreCase(DEBUG_PROPERTY_VALUE_TRUE) )
