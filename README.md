@@ -25,10 +25,10 @@ It is based on the original JTS4GWT library that is no longer maintained (see Th
 Gradle `build.gradle`:
 ```
     /* Used by server for GWT-RPC custom serialization at runtime */
-    implementation 'net.sf:jts4gwt:1.13.0'
+    implementation 'net.sf:jts4gwt:1.13.1'
     
     /* Used by the GWT compiler to generate emulated Javascript and RPC bindings */
-    compileOnly 'net.sf:jts4gwt:1.13.0:sources'
+    compileOnly 'net.sf:jts4gwt:1.13.1:sources'
 ```
 
 Maven `pom.xml`:
@@ -36,13 +36,13 @@ Maven `pom.xml`:
 	<dependency>
 	  <groupId>net.sf</groupId>
 	  <artifactId>jts4gwt</artifactId>
-	  <version>1.13.0</version>
+	  <version>1.13.1</version>
 	</dependency>
 	
 	<dependency>
 	  <groupId>net.sf</groupId>
 	  <artifactId>jts4gwt</artifactId>
-	  <version>1.13.0</version>
+	  <version>1.13.1</version>
 	  <classifier>sources<classifier>
 	  <scope>provided</scope>
 	</dependency>
